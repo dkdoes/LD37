@@ -5,8 +5,6 @@ window.onload = function(){
     world = new CANNON.World()
     world.gravity.set(0,-90,0)
     renderer = new THREE.WebGLRenderer({alpha:true})
-    //renderer.shadowMap.enabled = true
-    //renderer.shadowMapType = 0
     renderer.setClearColor(0xffffff,0)
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.domElement.style.position = "absolute"
@@ -29,7 +27,7 @@ window.onload = function(){
         }
     }
     s = new THREE.Spherical(25,1*Math.PI/4,0)
-    so = new THREE.Vector3(0,10.606601717798211,10.606601717798211)
+    so = new THREE.Vector3(0,17.677669529663685,17.677669529663685)
     function updatePosition(e) {
         s.theta -= e.movementX / 100
         s.phi -= e.movementY / 100
@@ -37,14 +35,12 @@ window.onload = function(){
         s.makeSafe()
         so.setFromSpherical(s)
     }
-    
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-    camera.position.set(0,10,10)
+    //camera.position.set(0,10,10)
     camera.update = function(){
         camera.position.copy(player.dampPos)
         camera.position.add(so)
         camera.lookAt(player.dampPos)
-        
     }
     scene.add(camera)
     resize = function(e){
@@ -58,53 +54,64 @@ window.onload = function(){
     }
     window.addEventListener('resize',resize)
     window.dispatchEvent(new Event('resize'))
+    
+    
+    
+    
+    
+    
+    
+    
     player = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.BoxGeometry(4, 4, 4),
         new THREE.MeshLambertMaterial({color:0x99aaff})
     )
     player.body = new CANNON.Body({
         mass:4,
-        shape:new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5))
+        shape:new CANNON.Box(new CANNON.Vec3(2,2,2))
     })
-    arrow = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.03,0.33,2,6),new THREE.MeshLambertMaterial({color:0x9988dd}))
-    arrow.material.transparent = true
-    arrow.material.opacity = 0.7
-    arrow.rotation.x=Math.PI/-2
-    scene.add(arrow)
+    arrow = new THREE.Mesh(new THREE.CylinderBufferGeometry(0,0.33,2,3),new THREE.MeshLambertMaterial({color:0xf6bd60}))
+    //arrow.material.transparent = true
+    //arrow.material.opacity = 0.7
+    //arrow.rotation.x=Math.PI/-2
+    //scene.add(arrow)
     player.body.position.y = 4
-    player.body.angularDamping = 0.9
+    //player.body.angularDamping = 0.9
     world.add(player.body)
-    player.speed = 15
-    player.mSpeed = 15
+    player.speed = 18
+    player.mSpeed = 18
     player.jSpeed = 12
     player.jumping = 0
     player.jumpVelocity = 40
+    
+    
+    
+    
+    player.scaleTweens = {}
+    player.scaleFactor = 1
+    player.scaling = false
+    
+    
+    
     player.shoot = new THREE.Vector3(1,0,0)
     player.shootTimer = 0
     player.shooting = false
+    
+    
+    
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
-        player.shootTimer>0&&(player.shootTimer-=delta)
-        if(player.shooting&&player.shootTimer<=0){
-            for(i=0;i<3;i++){
-                var temp = arrow.clone()
-                temp.dir = player.shoot.clone()
-                temp.dir.setLength(1.4)
-                temp.dir.add(new THREE.Vector3(
-                    Math.random()*0.1-0.05,
-                    Math.random()*0.01-0.005,
-                    Math.random()*0.1-0.05))
-                temp.life = 1
-                temp.update = function(){
-                    this.position.sub(this.dir)
-                    this.life-=delta
-                    this.life<=0&&scene.remove(this)
-                }
-                scene.add(temp)
-            }
-            player.shootTimer=0.1
+        if(player.scaling){
+            player.scaleFactor -= delta/3
+            if(player.scaleFactor<0.2){player.scaleFactor = 0.2}
+            player.scale.set(player.scaleFactor,player.scaleFactor,player.scaleFactor)
+            player.body.shapes[0].halfExtents.set(player.scaleFactor*2,player.scaleFactor*2,player.scaleFactor*2)
+            player.body.shapes[0].updateConvexPolyhedronRepresentation()
+            player.body.updateMassProperties()
+            player.body.updateBoundingRadius()
         }
+        
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -127,7 +134,7 @@ window.onload = function(){
         }
         temp2.normalize()
         if(temp2.norm()!=0){
-            temp2=temp2.mult(player.speed)
+            temp2=temp2.mult(player.speed*player.scaleFactor)
             player.body.velocity.x = temp2.x
             player.body.velocity.z = temp2.z
         }
@@ -159,9 +166,11 @@ window.onload = function(){
     player.jump = function(){
         if(player.jumping==0){
             player.jumping = 20
-            player.body.velocity.y = player.jumpVelocity
+            player.body.velocity.y = player.jumpVelocity*player.scaleFactor
             player.speed = player.jSpeed
         }
+    }
+    player.launch = function(){
     }
     scene.add(player)
     
@@ -193,6 +202,11 @@ window.onload = function(){
     
     ground0.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
     world.add(ground0.body)
+    
+    slideMaterial = new CANNON.Material("slideMaterial")
+    groundMaterial = new CANNON.Material("groundMaterial")
+    slide_ground_cm = new CANNON.ContactMaterial(slideMaterial,groundMaterial,{friction:0})
+    world.addContactMaterial(slide_ground_cm)
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
     skyLight.position.set(1,2,1)
@@ -261,10 +275,29 @@ window.onload = function(){
         }
     })   
     document.addEventListener('mousedown',function(e){
-        player.shooting = true
+        player.scaling = true
+        
     })
     document.addEventListener('mouseup',function(e){
-        player.shooting = false
+        player.scaling = false
+        player.launch()
+        
+        player.scaleTweens.mesh = new TWEEN.Tween(player.scale)
+            .to({x:1,y:1,z:1},100)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start()
+        player.scaleTweens.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
+            .to({x:2,y:2,z:2},100)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .onUpdate(function(){
+                player.body.shapes[0].updateConvexPolyhedronRepresentation()
+                player.body.updateMassProperties()
+                player.body.updateBoundingRadius()})
+            .start()
+        new TWEEN.Tween(player)
+            .to({scaleFactor:1},100)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start()
     })
     
     render()
