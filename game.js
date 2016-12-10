@@ -213,7 +213,7 @@ window.onload = function(){
         }
     }
     player.checkWall = function(){
-        if(player.launching){
+        if(player.launching==true){
             for(i=0;i<world.contacts.length;i++){
                 if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
                     player.launching==false
@@ -320,6 +320,7 @@ window.onload = function(){
             collisionFilterMask: 1 
         })
         this.mesh.body = this.body
+        this.mesh.parentRef = this
         this.mesh.x = x
         this.mesh.z = z
         if(r){
@@ -332,6 +333,8 @@ window.onload = function(){
         this.body.position.set(x,3.5,z)
         //this.body.position.y = 3.5
         this.mesh.update = function(){
+            this.timer>0&&(this.timer-=delta)
+            this.down&&this.timer<=0&&this.parentRef.heal()
             var tempX = Math.max(Math.min(minX,player.body.position.x),maxX)
             var tempZ = Math.max(Math.min(minZ,player.body.position.z),maxZ)
             
@@ -348,11 +351,15 @@ window.onload = function(){
             this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
             this.position.copy(this.body.position)
         }
-        this.hit = false
+        this.mesh.hit = false
+        this.mesh.down = false
+        this.mesh.timer = 0
         this.friendlyDown = function(){
-            if(this.hit==false){
+            if(this.mesh.down==false){
                 console.log('hit')
-                this.hit = true
+                this.mesh.hit = true
+                this.mesh.down = true
+                this.mesh.timer = 5
                 /*
                 walldownSound.pos(
                     player.position.x,
@@ -372,6 +379,13 @@ window.onload = function(){
                     .easing(TWEEN.Easing.Circular.InOut)
                     .start()
             }
+        }
+        this.heal = function(){
+            this.mesh.down = false
+            new TWEEN.Tween(this.body.position)
+                .to({y:3.5},500)
+                .easing(TWEEN.Easing.Circular.InOut)
+                .start()
         }
         
     }
