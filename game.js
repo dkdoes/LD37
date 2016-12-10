@@ -152,6 +152,7 @@ window.onload = function(){
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
+        
         powerupSound.pos(
             player.position.x,
             player.position.y,
@@ -167,6 +168,7 @@ window.onload = function(){
             player.position.y,
             player.position.z
         )
+        
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -388,11 +390,11 @@ window.onload = function(){
         }
         this.heal = function(){
             this.mesh.down = false
-            healSound.pos(
+            /*healSound.pos(
                 camera.position.x,
                 camera.position.y,
                 camera.position.z
-            )
+            )*/
             healSound.play()
             new TWEEN.Tween(this.body.position)
                 .to({y:3.5},500)
