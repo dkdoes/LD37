@@ -65,6 +65,7 @@ window.onload = function(){
             new THREE.PlaneBufferGeometry(10,10),
             new THREE.MeshLambertMaterial({color:0xffdddd})
     )
+    ground.material.side = THREE.DoubleSide
     ground.rotation.x = Math.PI*-0.5
     scene.add(ground)
     
@@ -84,20 +85,42 @@ window.onload = function(){
         e = e.which || e.keyCode
         switch(e){
             case 65:
-                player.position.x-=delta*player.speed
-                camera.position.x-=delta*player.speed
+                var temp = camera.clone()
+                //temp.rotation.x = 0
+                temp.position.sub(player.position)
+                temp.position.y=0
+                temp.position.normalize()
+                var temp2 = new THREE.Vector3(temp.position.z,0,-1*temp.position.x)
+                player.position.sub(temp2)
+                camera.position.sub(temp2)
                 break
             case 68:
-                player.position.x+=delta*player.speed
-                camera.position.x+=delta*player.speed
+                var temp = camera.clone()
+                //temp.rotation.x = 0
+                temp.position.sub(player.position)
+                temp.position.y=0
+                temp.position.normalize()
+                var temp2 = new THREE.Vector3(-1*temp.position.z,0,temp.position.x)
+                player.position.sub(temp2)
+                camera.position.sub(temp2)
                 break
             case 87:
-                player.position.z-=delta*player.speed
-                camera.position.z-=delta*player.speed
+                var temp = camera.clone()
+                temp.rotation.x = 0
+                temp.position.sub(player.position)
+                temp.position.y=0
+                temp.position.normalize()
+                player.position.sub(temp.position)
+                camera.position.sub(temp.position)
                 break
             case 83:
-                player.position.z+=delta*player.speed
-                camera.position.z+=delta*player.speed
+                var temp = camera.clone()
+                temp.rotation.x = 0
+                temp.position.sub(player.position)
+                temp.position.y=0
+                temp.position.normalize()
+                player.position.add(temp.position)
+                camera.position.add(temp.position)
                 break
             case 32:
                 //jump
