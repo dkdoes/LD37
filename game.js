@@ -265,7 +265,16 @@ window.onload = function(){
         }
     }
 
-    
+    roomBlock = new THREE.Mesh(
+        new THREE.BoxGeometry(10,10,10),
+        new THREE.MeshLambertMaterial({color:0x247ba0}))
+    scene.add(roomBlock)
+    roomBlock.body = new CANNON.Body({
+        mass:0,
+        shape:new CANNON.Box(new CANNON.Vec3(5,5,5)),
+        material:groundMaterial
+    })
+    world.add(roomBlock.body)
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
     skyLight.position.set(1,2,1)
