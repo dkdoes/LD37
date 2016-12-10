@@ -84,6 +84,14 @@ window.onload = function(){
         src:['heal.mp3']
     })
     healSound.volume(0.45)
+    saveSound = new Howl({
+        src:['save.mp3']
+    })
+    saveSound.volume(0.45)
+    loseSound = new Howl({
+        src:['lose.mp3']
+    })
+    loseSound.volume(0.45)
     song = new Howl({
         src:['song0.mp3'],
         loop:true,
@@ -322,6 +330,18 @@ window.onload = function(){
         }
         this.safe = false
         dudes.push(this)
+        this.save = function(){
+            if(this.safe == false){
+                saveSound.play()
+            }
+            this.safe = true
+        }
+        this.lose = function(){
+            if(this.safe == true){
+                loseSound.play()
+            }
+            this.safe = false
+        }
     }
     new dude()
     ground = new CANNON.Body({
@@ -408,10 +428,10 @@ window.onload = function(){
             
             for(var i=0;i<dudes.length;i++){
                 if(dudes[i].mesh.position.x>(this.position.x-this.x)-18&&dudes[i].mesh.position.x<(this.position.x-this.x)+18&&dudes[i].mesh.position.z>(this.position.z-this.z)-18&&dudes[i].mesh.position.z<(this.position.z-this.z)+18){
-                    dudes[i].safe = true
+                    dudes[i].save()
                 }
                 else{
-                    dudes[i].safe = false
+                    dudes[i].lose()
                 }
             }
         }
