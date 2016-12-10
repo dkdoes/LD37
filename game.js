@@ -254,7 +254,18 @@ window.onload = function(){
     ground.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
     ground.material=groundMaterial
     world.add(ground)
-    
+    for(i=0;i<4;i++){
+        var temp = new CANNON.Body({
+            mass:0,
+            shape: new CANNON.Plane(),
+            material:slideMaterial
+        })
+        i==0&&(temp.position.z=-110)
+        i==1&&(temp.position.z=90,temp.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI))
+        i==2&&(temp.position.x=90,temp.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_Y,Math.PI*-0.5))
+        i==3&&(temp.position.x=-110,temp.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_Y,Math.PI/2))
+        world.add(temp)
+    }
     
     for(x=0;x<10;x++){
         for(z=0;z<10;z++){
