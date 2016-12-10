@@ -286,7 +286,6 @@ window.onload = function(){
     maxX=-90
     minZ=70
     maxZ=-90
-    
     roomBlock = function(x,z,r){
         this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(15,7,3),
@@ -295,7 +294,7 @@ window.onload = function(){
         scene.add(this.mesh)
         this.body = new CANNON.Body({
             mass:0,
-            shape:new CANNON.Box(new CANNON.Vec3(7.5,2.5,1.5)),
+            shape:new CANNON.Box(new CANNON.Vec3(7.5,3.5,1.5)),
             material:groundMaterial,
             collisionFilterGroup: 2,
             collisionFilterMask: 1 
@@ -309,15 +308,21 @@ window.onload = function(){
         }
         world.add(this.body)
         
-
-        this.body.position.y = 3.5
+        this.body.position.set(x,3.5,z)
+        //this.body.position.y = 3.5
         this.mesh.update = function(){
             var tempX = Math.max(Math.min(minX,player.body.position.x),maxX)
             var tempZ = Math.max(Math.min(minZ,player.body.position.z),maxZ)
-            //(player.position.x<this.position.x
             
-            
-            player.body.position.y>=5 > 0 ? tempSpeed = 0.25 :  tempSpeed = 1
+            if(player.position.x<(this.position.x-this.x)-18||player.position.x>(this.position.x-this.x)+18||player.position.z<(this.position.z-this.z)-18||player.position.z>(this.position.z-this.z)+18){
+                tempSpeed=0
+            }
+            else if(player.body.position.y>=5 > 0){
+                tempSpeed = 0.25
+            }
+            else{
+                tempSpeed = 1.5
+            }
             this.body.position.x -= (this.body.position.x-(tempX+this.x))*delta*tempSpeed
             this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
             this.position.copy(this.body.position)
