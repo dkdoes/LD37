@@ -133,7 +133,7 @@ window.onload = function(){
     
     
     
-    
+    player.kills = 0
     
     
     player.body.material = groundMaterial
@@ -246,7 +246,7 @@ window.onload = function(){
         for(i=0;i<dudes.length;i++){
             dudes[i].safe==true && score++
         }
-        document.getElementById('score').innerHTML='Score: '+score
+        document.getElementById('score').innerHTML='Score: '+score+'<br>Saved: '+score+' / '+dudes.length+'<br>Kills: '+player.kills
     }
     player.jump = function(){
         if(player.jumping==0){
