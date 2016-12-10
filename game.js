@@ -84,7 +84,12 @@ window.onload = function(){
         src:['heal.mp3']
     })
     healSound.volume(0.45)
-    
+    song = new Howl({
+        src:['song0.mp3'],
+        loop:true,
+        volume:0.35,
+        autoplay:true
+    })
     
     
     
