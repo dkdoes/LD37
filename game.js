@@ -281,6 +281,39 @@ window.onload = function(){
     // f76c5e
     // f68e5f
     
+    //enemy
+    //db2b39
+    
+    //green guy colors
+    //00a676
+    //7cea9c
+    //065143
+    //2cda9d
+    //4da167
+    
+    dude = function(){
+        this.mesh = new THREE.Mesh(
+            new THREE.SphereBufferGeometry(2,12,10),
+            new THREE.MeshLambertMaterial({color:0x4da167})
+        )
+        scene.add(this.mesh)
+        this.body = new CANNON.Body({
+            mass:2,
+            shape:new CANNON.Sphere(2),
+            material:groundMaterial,
+            collisionFilterGroup:1,
+            collisionFilterMask:2|4
+        })
+        this.mesh.body = this.body
+        this.body.mesh = this.mesh
+        this.mesh.parentRef = this
+        this.body.parentRef = this
+        world.add(this.body)
+        this.mesh.update = function(){
+            this.quaternion.fromArray(this.body.quaternion.toArray())
+            this.position.copy(this.body.position)
+        }
+    }
     
     ground = new CANNON.Body({
         mass:0,
