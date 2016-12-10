@@ -27,13 +27,14 @@ window.onload = function(){
         }
     }
     s = new THREE.Spherical(25,1*Math.PI/4,0)
+    sFix = new THREE.Spherical(25,1*Math.PI/4,0)
     so = new THREE.Vector3(0,17.677669529663685,17.677669529663685)
     function updatePosition(e) {
         s.theta -= e.movementX / 100
         s.phi -= e.movementY / 100
         s.phi = Math.max(0.1,Math.min(1.55,s.phi))
         s.makeSafe()
-        so.setFromSpherical(s)
+        //so.setFromSpherical(s)
     }
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
     //camera.position.set(0,10,10)
@@ -569,6 +570,9 @@ window.addEventListener('focus',function(){
 render = function(){
     animate&&requestAnimationFrame(render)
     delta = clock.getDelta()
+    sFix.theta -= (sFix.theta-s.theta)*delta*15
+    sFix.phi -= (sFix.phi-s.phi)*delta*15
+    so.setFromSpherical(sFix)
     TWEEN.update()
     world.step(1/60,delta,10)
     for(i=0;i<scene.children.length;i++){
