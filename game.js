@@ -80,6 +80,11 @@ window.onload = function(){
         src:['walldown.mp3']
     })
     walldownSound.volume(0.45)
+    healSound = new Howl({
+        src:['heal.mp3']
+    })
+    healSound.volume(0.45)
+    
     
     
     
@@ -383,6 +388,12 @@ window.onload = function(){
         }
         this.heal = function(){
             this.mesh.down = false
+            healSound.pos(
+                camera.position.x,
+                camera.position.y,
+                camera.position.z
+            )
+            healSound.play()
             new TWEEN.Tween(this.body.position)
                 .to({y:3.5},500)
                 .easing(TWEEN.Easing.Circular.InOut)
