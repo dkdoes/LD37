@@ -26,19 +26,18 @@ window.onload = function(){
             document.removeEventListener("mousemove", updatePosition, false)
         }
     }
-    
+    s = new THREE.Spherical(15,1*Math.PI/4,0)
+    so = new THREE.Vector3(0,10.606601717798211,10.606601717798211)
     function updatePosition(e) {
-        mouse.x += e.movementX
-        mouse.y += e.movementY
-        mouse.dX = e.movementX
-        mouse.dY = e.movementY
+        s.theta -= e.movementX / 100
+        s.phi -= e.movementY / 100
+        s.makeSafe()
+        so.setFromSpherical(s)
     }
     
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
     camera.position.set(0,10,10)
-    mouse = new THREE.Vector2()
-    mouse.dX = 0
-    mouse.dY = 0
+    
     camera.update = function(){
         /*
         if(delta==2){
@@ -51,8 +50,11 @@ window.onload = function(){
             camera.position.y = hiddenCam.position.y
             camera.position.z = hiddenCam.position.z
         }
-        camera.lookAt(player.position)
         */
+        camera.position.copy(player.position)
+        camera.position.add(so)
+        camera.lookAt(player.position)
+        
     }
     scene.add(camera)
     resize = function(e){
@@ -114,7 +116,6 @@ window.onload = function(){
     ground.rotation.x = Math.PI*-0.5
     scene.add(ground)
     hiddenCam = new THREE.PerspectiveCamera()
-    orbit = new THREE.OrbitControls(camera)
     skyLight = new THREE.DirectionalLight(0xffffff, 1)
     skyLight.position.set(1,2,1)
     scene.add(skyLight)
@@ -132,52 +133,18 @@ window.onload = function(){
             case 65:
                 player.left = 1
                 player.right == 1 && player.right++
-                /*
-                var temp = camera.clone()
-                temp.position.sub(player.body.position)
-                temp.position.y=0
-                temp.position.normalize()
-                var temp2 = new THREE.Vector3(temp.position.z,0,-1*temp.position.x)
-                player.body.position=player.body.position.vsub(temp2)
-                camera.position.sub(temp2)
-                */
                 break
             case 68:
                 player.right = 1
                 player.left == 1 && player.left++
-                /*
-                var temp = camera.clone()
-                temp.position.sub(player.position)
-                temp.position.y=0
-                temp.position.normalize()
-                var temp2 = new THREE.Vector3(-1*temp.position.z,0,temp.position.x)
-                player.body.position=player.body.position.vsub(temp2)
-                camera.position.sub(temp2)
-                */
                 break
             case 87:
                 player.up = 1
                 player.down == 1 && player.down++
-                /*
-                var temp = camera.clone()
-                temp.position.sub(player.position)
-                temp.position.y=0
-                temp.position.normalize()
-                player.body.position=player.body.position.vsub(temp.position)
-                camera.position.sub(temp.position)
-                */
                 break
             case 83:
                 player.down = 1
                 player.up == 1 && player.up++
-                /*
-                var temp = camera.clone()
-                temp.position.sub(player.position)
-                temp.position.y=0
-                temp.position.normalize()
-                player.body.position=player.body.position.vadd(temp.position)
-                camera.position.add(temp.position)
-                */
                 break
             case 32:
                 //jump
@@ -221,12 +188,12 @@ render = function(){
     requestAnimationFrame(render)
     delta = clock.getDelta()
     TWEEN.update()
+    
     world.step(1/60,delta,10)
     for(i=0;i<scene.children.length;i++){
         try{
             scene.children[i].update()
         }catch(err){}
     }
-    orbit.update()
     renderer.render(scene,camera)
 }
