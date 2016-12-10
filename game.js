@@ -8,7 +8,7 @@ window.onload = function(){
     renderer.setClearColor(0xffffff,0)
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.domElement.style.position = "absolute"
-    renderer.domElement.style.zindex = -100
+    renderer.domElement.style.zindex = 0
     document.body.appendChild(renderer.domElement)
     renderer.domElement.addEventListener('click',function(){
         renderer.domElement.requestPointerLock()
