@@ -30,8 +30,8 @@ window.onload = function(){
     sFix = new THREE.Spherical(25,1*Math.PI/4,0)
     so = new THREE.Vector3(0,17.677669529663685,17.677669529663685)
     function updatePosition(e) {
-        s.theta -= e.movementX / 100
-        s.phi -= e.movementY / 100
+        s.theta -= e.movementX / 400
+        s.phi -= e.movementY / 400
         s.phi = Math.max(0.1,Math.min(1.55,s.phi))
         s.makeSafe()
         //so.setFromSpherical(s)
