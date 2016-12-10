@@ -41,6 +41,15 @@ window.onload = function(){
         camera.position.copy(player.dampPos)
         camera.position.add(so)
         camera.lookAt(player.dampPos)
+        Howler.pos(
+            camera.position.x,
+            camera.position.y,
+            camera.position.z
+        )
+        Howler.orientation(
+            camera.matrix.elements[8]*-1,
+            camera.matrix.elements[9]*-1,
+            camera.matrix.elements[10]*-1)
     }
     scene.add(camera)
     resize = function(e){
@@ -105,9 +114,14 @@ window.onload = function(){
     
     
     
+    
+    
+    
     player.body.material = groundMaterial
     
     
+    
+    player.powerupfade = {}
     
     player.scaleTween = {}
     player.scaleFactor = 1
@@ -124,6 +138,16 @@ window.onload = function(){
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
+        powerupSound.pos(
+            player.position.x,
+            player.position.y,
+            player.position.z
+        )
+        launchSound.pos(
+            player.position.x,
+            player.position.y,
+            player.position.z
+        )
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -302,6 +326,7 @@ window.onload = function(){
     })   
     document.addEventListener('mousedown',function(e){
         //player.scaling = true
+        player.powerupfade = powerupSound.play()
         try{
             player.scaleTween.mesh.stop()
             player.scaleTween.body.stop()
@@ -332,6 +357,10 @@ window.onload = function(){
     document.addEventListener('mouseup',function(e){
         //player.scaling = false
         player.launch()
+        try{
+            powerupSound.fade(1,0,100,player.powerupfade)
+        }catch(err){}
+        if(player.scaleFactor<0.8){launchSound.play()}
         try{
             player.scaleTween.mesh.stop()
             player.scaleTween.body.stop()
