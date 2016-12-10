@@ -72,7 +72,9 @@ window.onload = function(){
     powerupSound = new Howl({
         src:['powerup.mp3']
     })
-    
+    jumpSound = new Howl({
+        src:['jump.mp3']
+    })
     
     
     
@@ -148,6 +150,11 @@ window.onload = function(){
             player.position.y,
             player.position.z
         )
+        jumpSound.pos(
+            player.position.x,
+            player.position.y,
+            player.position.z
+        )
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -204,6 +211,7 @@ window.onload = function(){
             player.jumping = 20
             player.body.velocity.y = player.jumpVelocity//*player.scaleFactor
             player.speed = player.jSpeed
+            jumpSound.play()
         }
     }
     player.launching = false
