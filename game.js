@@ -197,7 +197,7 @@ window.onload = function(){
         player.jumping > 1 && player.jumping--
         if(player.jumping == 1){
             for(i=0;i<world.contacts.length;i++){
-                if(world.contacts[i].bi == ground || world.contacts[i].bj == ground){
+                if(world.contacts[i].bi.material == groundMaterial || world.contacts[i].bj.material == groundMaterial){
                     if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
                         player.jumping = 0
                         player.speed = player.mSpeed
@@ -265,6 +265,7 @@ window.onload = function(){
         }
     }
 
+    
     roomBlock = new THREE.Mesh(
         new THREE.BoxGeometry(10,10,10),
         new THREE.MeshLambertMaterial({color:0x247ba0}))
@@ -275,6 +276,8 @@ window.onload = function(){
         material:groundMaterial
     })
     world.add(roomBlock.body)
+    
+    
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
     skyLight.position.set(1,2,1)
@@ -345,67 +348,71 @@ window.onload = function(){
     })   
     document.addEventListener('mousedown',function(e){
         //player.scaling = true
-        player.powerupfade = powerupSound.play()
-        try{
-            player.scaleTween.mesh.stop()
-            player.scaleTween.body.stop()
-            player.scaleTween.factor.stop()
-            player.scaleTween.color.stop()
-        }catch(err){}
-        player.scaleTween.mesh = new TWEEN.Tween(player.scale)
-            .to({x:0.2,y:0.2,z:0.2},2779)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start()
-        player.scaleTween.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
-            .to({x:0.4,y:0.4,z:0.4},2779)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .onUpdate(function(){
-                player.body.shapes[0].updateConvexPolyhedronRepresentation()
-                player.body.updateMassProperties()
-                player.body.updateBoundingRadius()})
-            .start()
-        player.scaleTween.factor = new TWEEN.Tween(player)
-            .to({scaleFactor:0.2},2779)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start()
-        player.scaleTween.color = new TWEEN.Tween(player.material.color)
-            .to({r:0.8,g:0.1,b:0.1},2779)
-            .easing(TWEEN.Easing.Cubic.InOut)
-            .start()
+        if(e.button==0){
+            player.powerupfade = powerupSound.play()
+            try{
+                player.scaleTween.mesh.stop()
+                player.scaleTween.body.stop()
+                player.scaleTween.factor.stop()
+                player.scaleTween.color.stop()
+            }catch(err){}
+            player.scaleTween.mesh = new TWEEN.Tween(player.scale)
+                .to({x:0.2,y:0.2,z:0.2},2779)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .start()
+            player.scaleTween.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
+                .to({x:0.4,y:0.4,z:0.4},2779)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .onUpdate(function(){
+                    player.body.shapes[0].updateConvexPolyhedronRepresentation()
+                    player.body.updateMassProperties()
+                    player.body.updateBoundingRadius()})
+                .start()
+            player.scaleTween.factor = new TWEEN.Tween(player)
+                .to({scaleFactor:0.2},2779)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .start()
+            player.scaleTween.color = new TWEEN.Tween(player.material.color)
+                .to({r:0.8,g:0.1,b:0.1},2779)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start()
+        }
     })
     document.addEventListener('mouseup',function(e){
         //player.scaling = false
-        player.launch()
-        try{
-            powerupSound.fade(1,0,100,player.powerupfade)
-        }catch(err){}
-        if(player.scaleFactor<0.8){launchSound.play()}
-        try{
-            player.scaleTween.mesh.stop()
-            player.scaleTween.body.stop()
-            player.scaleTween.factor.stop()
-            player.scaleTween.color.stop()
-        }catch(err){}
-        player.scaleTween.mesh = new TWEEN.Tween(player.scale)
-            .to({x:1,y:1,z:1},100)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start()
-        player.scaleTween.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
-            .to({x:2,y:2,z:2},100)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .onUpdate(function(){
-                player.body.shapes[0].updateConvexPolyhedronRepresentation()
-                player.body.updateMassProperties()
-                player.body.updateBoundingRadius()})
-            .start()
-        player.scaleTween.factor = new TWEEN.Tween(player)
-            .to({scaleFactor:1},100)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start()
-        player.scaleTween.color = new TWEEN.Tween(player.material.color)
-            .to({r:0.196,g:0.2627,b:0.4627},100)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start()
+        if(e.button==0){
+            player.launch()
+            try{
+                powerupSound.fade(1,0,100,player.powerupfade)
+            }catch(err){}
+            if(player.scaleFactor<0.8){launchSound.play()}
+            try{
+                player.scaleTween.mesh.stop()
+                player.scaleTween.body.stop()
+                player.scaleTween.factor.stop()
+                player.scaleTween.color.stop()
+            }catch(err){}
+            player.scaleTween.mesh = new TWEEN.Tween(player.scale)
+                .to({x:1,y:1,z:1},100)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .start()
+            player.scaleTween.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
+                .to({x:2,y:2,z:2},100)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .onUpdate(function(){
+                    player.body.shapes[0].updateConvexPolyhedronRepresentation()
+                    player.body.updateMassProperties()
+                    player.body.updateBoundingRadius()})
+                .start()
+            player.scaleTween.factor = new TWEEN.Tween(player)
+                .to({scaleFactor:1},100)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .start()
+            player.scaleTween.color = new TWEEN.Tween(player.material.color)
+                .to({r:0.196,g:0.2627,b:0.4627},100)
+                .easing(TWEEN.Easing.Exponential.Out)
+                .start()
+        }
     })
     
     render()
