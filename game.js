@@ -107,7 +107,7 @@ window.onload = function(){
     //arrow.material.opacity = 0.7
     //arrow.rotation.x=Math.PI/-2
     //scene.add(arrow)
-    player.body.position.y = 4
+    player.body.position.y = 10
     //player.body.angularDamping = 0.9
     world.add(player.body)
     player.speed = 18
@@ -282,10 +282,14 @@ window.onload = function(){
         }
     }
 
+    minX=70
+    maxX=-90
+    minZ=70
+    maxZ=-90
     
     roomBlock = function(x,z,r){
         this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(15,5,3),
+            new THREE.BoxGeometry(15,7,3),
             new THREE.MeshLambertMaterial({color:0x247ba0})
         )
         scene.add(this.mesh)
@@ -304,15 +308,22 @@ window.onload = function(){
             this.mesh.quaternion.fromArray(this.body.quaternion.toArray())
         }
         world.add(this.body)
-        this.body.position.y = 2.5
+        
+
+        this.body.position.y = 3.5
         this.mesh.update = function(){
-            //this.body.position.y = 2.5
+            var tempX = Math.max(Math.min(minX,player.body.position.x),maxX)
+            var tempZ = Math.max(Math.min(minZ,player.body.position.z),maxZ)
+            //(player.position.x<this.position.x
             
-            this.body.position.x -= (this.body.position.x-(player.body.position.x+this.x))*delta/2
-            this.body.position.z -= (this.body.position.z-(player.body.position.z+this.z))*delta/2
+            
+            player.body.position.y>=5 > 0 ? tempSpeed = 0.25 :  tempSpeed = 1
+            this.body.position.x -= (this.body.position.x-(tempX+this.x))*delta*tempSpeed
+            this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
             this.position.copy(this.body.position)
         }
     }
+
     new roomBlock(12,-18)
     new roomBlock(0,-18)
     new roomBlock(-12,-18)
@@ -320,6 +331,11 @@ window.onload = function(){
     new roomBlock(0,18)
     new roomBlock(12,18)
     new roomBlock(-18,12,true)
+    new roomBlock(-18,0,true)
+    new roomBlock(-18,-12,true)
+    new roomBlock(18,-12,true)
+    new roomBlock(18,0,true)
+    new roomBlock(18,12,true)
     
     
     /*
