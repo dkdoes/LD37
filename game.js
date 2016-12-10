@@ -101,7 +101,7 @@ window.onload = function(){
     
     
     
-    player.scaleTweens = {}
+    player.scaleTween = {}
     player.scaleFactor = 1
     player.scaling = false
     
@@ -116,6 +116,7 @@ window.onload = function(){
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
+        /*
         if(player.scaling){
             player.scaleFactor -= delta/3
             if(player.scaleFactor<0.2){player.scaleFactor = 0.2}
@@ -125,7 +126,7 @@ window.onload = function(){
             player.body.updateMassProperties()
             player.body.updateBoundingRadius()
         }
-        
+        */
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -304,12 +305,31 @@ window.onload = function(){
     })   
     document.addEventListener('mousedown',function(e){
         player.scaling = true
-        
+        player.scaleTween.mesh = new TWEEN.Tween(player.scale)
+            .to({x:0.2,y:0.2,z:0.2},2779)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start()
+        player.scaleTween.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
+            .to({x:0.4,y:0.4,z:0.4},2779)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .onUpdate(function(){
+                player.body.shapes[0].updateConvexPolyhedronRepresentation()
+                player.body.updateMassProperties()
+                player.body.updateBoundingRadius()})
+            .start()
+        player.scaleTween.factor = new TWEEN.Tween(player)
+            .to({scaleFactor:0.2},2779)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start()
     })
     document.addEventListener('mouseup',function(e){
         player.scaling = false
         player.launch()
-        
+        try{
+            player.scaleTween.mesh.stop()
+            player.scaleTween.body.stop()
+            player.scaleTween.factor.stop()
+        }catch(err){}
         new TWEEN.Tween(player.scale)
             .to({x:1,y:1,z:1},100)
             .easing(TWEEN.Easing.Exponential.Out)
