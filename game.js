@@ -115,7 +115,7 @@ window.onload = function(){
         mass:4,
         shape:new CANNON.Box(new CANNON.Vec3(2,2,2)),
         collisionFilterGroup:1,
-        collisionFilterMask:2|4
+        collisionFilterMask:1|2|4
     })
     arrow = new THREE.Mesh(new THREE.CylinderBufferGeometry(0,0.33,2,3),new THREE.MeshLambertMaterial({color:0xf6bd60}))
     //arrow.material.transparent = true
@@ -302,7 +302,7 @@ window.onload = function(){
             shape:new CANNON.Sphere(2),
             material:groundMaterial,
             collisionFilterGroup:1,
-            collisionFilterMask:2|4
+            collisionFilterMask:1|2|4
         })
         this.mesh.body = this.body
         this.body.mesh = this.mesh
@@ -314,7 +314,7 @@ window.onload = function(){
             this.position.copy(this.body.position)
         }
     }
-    
+    new dude()
     ground = new CANNON.Body({
         mass:0,
         shape: new CANNON.Plane(),
