@@ -241,6 +241,13 @@ window.onload = function(){
             }
         }
     }
+    player.checkScore = function(){
+        var score = 0
+        for(i=0;i<dudes.length;i++){
+            dudes[i].safe==true && score++
+        }
+        document.getElementById('score').innerHTML='Score: '+score
+    }
     player.jump = function(){
         if(player.jumping==0){
             player.jumping = 20
@@ -290,7 +297,7 @@ window.onload = function(){
     //065143
     //2cda9d
     //4da167
-    
+    dudes = []
     dude = function(){
         this.mesh = new THREE.Mesh(
             new THREE.SphereBufferGeometry(2,12,10),
@@ -313,6 +320,8 @@ window.onload = function(){
             this.quaternion.fromArray(this.body.quaternion.toArray())
             this.position.copy(this.body.position)
         }
+        this.safe = false
+        dudes.push(this)
     }
     new dude()
     ground = new CANNON.Body({
@@ -396,6 +405,15 @@ window.onload = function(){
             this.body.position.x -= (this.body.position.x-(tempX+this.x))*delta*tempSpeed
             this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
             this.position.copy(this.body.position)
+            
+            for(var i=0;i<dudes.length;i++){
+                if(dudes[i].mesh.position.x>(this.position.x-this.x)-18&&dudes[i].mesh.position.x<(this.position.x-this.x)+18&&dudes[i].mesh.position.z>(this.position.z-this.z)-18&&dudes[i].mesh.position.z<(this.position.z-this.z)+18){
+                    dudes[i].safe = true
+                }
+                else{
+                    dudes[i].safe = false
+                }
+            }
         }
         this.mesh.hit = false
         this.mesh.down = false
@@ -406,20 +424,7 @@ window.onload = function(){
                 this.mesh.hit = true
                 this.mesh.down = true
                 this.mesh.timer = 5
-                /*
-                walldownSound.pos(
-                    player.position.x,
-                    player.position.y,
-                    player.position.z
-                )*/
                 walldownSound.play()
-                /*
-                this.mesh.material.color.set(0xffffff)
-                new TWEEN.Tween(this.mesh.material.color)
-                    .to({r:0.1411764705882353,g:0.4823529411764706,b:0.6274509803921569},100)
-                    .easing(TWEEN.Easing.Exponential.In)
-                    .start()
-                    */
                 new TWEEN.Tween(this.body.position)
                     .to({y:-3.51},200)
                     .easing(TWEEN.Easing.Circular.InOut)
@@ -428,11 +433,6 @@ window.onload = function(){
         }
         this.heal = function(){
             this.mesh.down = false
-            /*healSound.pos(
-                camera.position.x,
-                camera.position.y,
-                camera.position.z
-            )*/
             healSound.play()
             new TWEEN.Tween(this.body.position)
                 .to({y:3.5},500)
@@ -455,22 +455,6 @@ window.onload = function(){
     new roomBlock(18,0,true)
     new roomBlock(18,12,true)
     
-    
-    /*
-    roomBlock = new THREE.Mesh(
-        new THREE.BoxGeometry(15,10,3),
-        new THREE.MeshLambertMaterial({color:0x247ba0}))
-    scene.add(roomBlock)
-    roomBlock.body = new CANNON.Body({
-        mass:0,
-        shape:new CANNON.Box(new CANNON.Vec3(7.5,5,1.5)),
-        material:groundMaterial
-    })
-    roomBlock.update = function(){
-        roomBlock.position.copy(roomBlock.body.position)
-    }
-    world.add(roomBlock.body)
-    */
     
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
@@ -541,7 +525,6 @@ window.onload = function(){
         }
     })   
     document.addEventListener('mousedown',function(e){
-        //player.scaling = true
         if(e.button==0){
             player.powerupfade = powerupSound.play()
             try{
@@ -573,7 +556,6 @@ window.onload = function(){
         }
     })
     document.addEventListener('mouseup',function(e){
-        //player.scaling = false
         if(e.button==0){
             player.launch()
             try{
@@ -631,6 +613,7 @@ render = function(){
             scene.children[i].update()
         }catch(err){}
     }
+    player.checkScore()
     player.checkJump()
     player.checkWall()
     renderer.render(scene,camera)
