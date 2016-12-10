@@ -3,7 +3,7 @@ window.onload = function(){
     clock = new THREE.Clock()
     delta = clock.getDelta()
     world = new CANNON.World()
-    //world.gravity.set(0,-80,0)
+    world.gravity.set(0,-80,0)
     renderer = new THREE.WebGLRenderer()
     renderer.setClearColor(0xffffff)
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -26,34 +26,22 @@ window.onload = function(){
             document.removeEventListener("mousemove", updatePosition, false)
         }
     }
-    s = new THREE.Spherical(15,1*Math.PI/4,0)
+    s = new THREE.Spherical(25,1*Math.PI/4,0)
     so = new THREE.Vector3(0,10.606601717798211,10.606601717798211)
     function updatePosition(e) {
         s.theta -= e.movementX / 100
         s.phi -= e.movementY / 100
+        s.phi = Math.min(1.55,s.phi)
         s.makeSafe()
         so.setFromSpherical(s)
     }
     
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
     camera.position.set(0,10,10)
-    
     camera.update = function(){
-        /*
-        if(delta==2){
-            camera.position.x -= (camera.position.x - hiddenCam.position.x) * delta * 2
-            camera.position.y -= (camera.position.y - hiddenCam.position.y) * delta * 2
-            camera.position.z -= (camera.position.z - hiddenCam.position.z) * delta * 2
-        }
-        else{
-            camera.position.x = hiddenCam.position.x
-            camera.position.y = hiddenCam.position.y
-            camera.position.z = hiddenCam.position.z
-        }
-        */
-        camera.position.copy(player.position)
+        camera.position.copy(player.dampPos)
         camera.position.add(so)
-        camera.lookAt(player.position)
+        camera.lookAt(player.dampPos)
         
     }
     scene.add(camera)
@@ -76,9 +64,11 @@ window.onload = function(){
         mass:4,
         shape:new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5))
     })
+    player.body.position.y = 4
     world.add(player.body)
-    player.speed = 20
+    player.speed = 10
     player.left=0;player.right=0;player.up=0;player.down=0
+    player.dampPos = player.position.clone()
     player.update = function(){
         var temp = camera.position.clone()
         temp.sub(player.body.position)
@@ -100,11 +90,16 @@ window.onload = function(){
             temp2=temp2.vsub(temp3)
         }
         temp2.normalize()
-        temp2=temp2.mult(player.speed)
-        player.body.velocity.x = temp2.x
-        player.body.velocity.z = temp2.z
+        if(temp2.norm()!=0){
+            temp2=temp2.mult(player.speed)
+            player.body.velocity.x = temp2.x
+            player.body.velocity.z = temp2.z
+        }
         player.quaternion.fromArray(player.body.quaternion.toArray())
         player.position.copy(player.body.position)
+        player.dampPos.x -= (player.dampPos.x-player.position.x)*delta*10
+        player.dampPos.y -=(player.dampPos.y-player.position.y)*delta*3
+        player.dampPos.z -= (player.dampPos.z-player.position.z)*delta*10
     }
     scene.add(player)
     
@@ -115,14 +110,21 @@ window.onload = function(){
     ground.material.side = THREE.DoubleSide
     ground.rotation.x = Math.PI*-0.5
     scene.add(ground)
-    hiddenCam = new THREE.PerspectiveCamera()
+    
+    ground.body = new CANNON.Body({
+        mass:0,
+        shape: new CANNON.Plane()
+    })
+    ground.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
+    world.add(ground.body)
+    
     skyLight = new THREE.DirectionalLight(0xffffff, 1)
     skyLight.position.set(1,2,1)
     scene.add(skyLight)
     ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
     scene.add(ambientLight)
-    floorLight = new THREE.DirectionalLight(0xffffff, 0.1)
-    floorLight.position.set(0,-1,0)
+    floorLight = new THREE.DirectionalLight(0xffffff, 0.3)
+    floorLight.position.set(-1,-2,-1)
     scene.add(floorLight)
     
     document.addEventListener('keydown',function(e){
