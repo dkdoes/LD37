@@ -60,6 +60,17 @@ window.onload = function(){
     
     
     
+    slideMaterial = new CANNON.Material("slideMaterial")
+    groundMaterial = new CANNON.Material("groundMaterial")
+    slide_ground_cm = new CANNON.ContactMaterial(slideMaterial,groundMaterial,{friction:0})
+    world.addContactMaterial(slide_ground_cm)
+    
+    
+    
+    
+    
+    
+    
     
     
     player = new THREE.Mesh(
@@ -84,6 +95,9 @@ window.onload = function(){
     player.jumping = 0
     player.jumpVelocity = 40
     
+    
+    
+    player.body.material = groundMaterial
     
     
     
@@ -133,7 +147,7 @@ window.onload = function(){
             temp2=temp2.vsub(temp3)
         }
         temp2.normalize()
-        if(temp2.norm()!=0){
+        if(player.canMove&&temp2.norm()!=0){
             temp2=temp2.mult(player.speed*player.scaleFactor)
             player.body.velocity.x = temp2.x
             player.body.velocity.z = temp2.z
@@ -154,7 +168,7 @@ window.onload = function(){
         player.jumping > 1 && player.jumping--
         if(player.jumping == 1){
             for(i=0;i<world.contacts.length;i++){
-                if(world.contacts[i].bi == ground0.body || world.contacts[i].bj == ground0.body){
+                if(world.contacts[i].bi == ground || world.contacts[i].bj == ground){
                     if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
                         player.jumping = 0
                         player.speed = player.mSpeed
@@ -170,7 +184,22 @@ window.onload = function(){
             player.speed = player.jSpeed
         }
     }
+    player.launching = false
+    player.canMove = true
     player.launch = function(){
+        player.launching = true
+        player.canMove = false
+        player.body.material = slideMaterial
+        var temp = player.shoot.clone()
+        temp.setLength(40*(1/player.scaleFactor))
+        player.body.velocity.set(temp.x*-1,0,temp.z*-1)
+        setTimeout(function(){
+            player.body.material = groundMaterial
+            player.canMove = true
+        },300*(0.7/player.scaleFactor))
+        setTimeout(function(){
+            player.launching = false
+        },222)
     }
     scene.add(player)
     
@@ -195,18 +224,16 @@ window.onload = function(){
     scene.add(ground3)
     
     
-    ground0.body = new CANNON.Body({
+    ground = new CANNON.Body({
         mass:0,
         shape: new CANNON.Plane()
     })
+    ground.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
+    ground.material=groundMaterial
+    world.add(ground)
     
-    ground0.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
-    world.add(ground0.body)
+
     
-    slideMaterial = new CANNON.Material("slideMaterial")
-    groundMaterial = new CANNON.Material("groundMaterial")
-    slide_ground_cm = new CANNON.ContactMaterial(slideMaterial,groundMaterial,{friction:0})
-    world.addContactMaterial(slide_ground_cm)
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
     skyLight.position.set(1,2,1)
@@ -218,8 +245,9 @@ window.onload = function(){
     scene.add(floorLight)
     
     
-    //player.castShadow = true
-    //skyLight.castShadow = true
+    
+    
+    
     document.addEventListener('keydown',function(e){
         e.preventDefault()
         e = e || window.event
@@ -282,11 +310,11 @@ window.onload = function(){
         player.scaling = false
         player.launch()
         
-        player.scaleTweens.mesh = new TWEEN.Tween(player.scale)
+        new TWEEN.Tween(player.scale)
             .to({x:1,y:1,z:1},100)
             .easing(TWEEN.Easing.Exponential.Out)
             .start()
-        player.scaleTweens.body = new TWEEN.Tween(player.body.shapes[0].halfExtents)
+        new TWEEN.Tween(player.body.shapes[0].halfExtents)
             .to({x:2,y:2,z:2},100)
             .easing(TWEEN.Easing.Exponential.Out)
             .onUpdate(function(){
