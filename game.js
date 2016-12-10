@@ -75,11 +75,22 @@ window.onload = function(){
     player.speed = 15
     player.mSpeed = 15
     player.jSpeed = 12
-    player.jumping = 1
+    player.jumping = 0
     player.jumpVelocity = 40
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
-    player.update = function(){
+    player.update = function(){/*
+        for(i=0;i<world.contacts.length;i++){
+            console.log('yes')
+            
+            if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
+                if(Math.abs(world.contacts[i].ni.y)>0.95){
+                    player.jumping = 0
+                    player.speed = player.mSpeed
+                }
+            }
+            
+        }*/
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -117,10 +128,27 @@ window.onload = function(){
         player.dampPos.x -= (player.dampPos.x-player.position.x)*delta*2
         player.dampPos.y -=(player.dampPos.y-player.position.y)*delta*2
         player.dampPos.z -= (player.dampPos.z-player.position.z)*delta*2
+        
+    }
+    player.checkJump = function(){
+        player.jumping > 1 && player.jumping--
+        if(player.jumping == 1){
+            for(i=0;i<world.contacts.length;i++){
+                if(world.contacts[i].bi == ground.body || world.contacts[i].bj == ground.body){
+                    if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
+                        player.jumping = 0
+                        player.speed = player.mSpeed
+                    }
+                }
+            }
+        }
     }
     player.jump = function(){
-        player.body.velocity.y = player.jumpVelocity
-        player.speed = player.jSpeed
+        if(player.jumping==0){
+            player.jumping = 20
+            player.body.velocity.y = player.jumpVelocity
+            player.speed = player.jSpeed
+        }
     }
     scene.add(player)
     
@@ -210,12 +238,12 @@ render = function(){
     requestAnimationFrame(render)
     delta = clock.getDelta()
     TWEEN.update()
-    
     world.step(1/60,delta,10)
     for(i=0;i<scene.children.length;i++){
         try{
             scene.children[i].update()
         }catch(err){}
     }
+    player.checkJump()
     renderer.render(scene,camera)
 }
