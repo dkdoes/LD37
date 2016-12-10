@@ -57,6 +57,14 @@ window.onload = function(){
     
     
     
+    launchSound = new Howl({
+        src:['launch.mp3']
+    })
+    powerupSound = new Howl({
+        src:['powerup.mp3']
+    })
+    
+    
     
     
     
