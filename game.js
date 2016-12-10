@@ -98,7 +98,9 @@ window.onload = function(){
     )
     player.body = new CANNON.Body({
         mass:4,
-        shape:new CANNON.Box(new CANNON.Vec3(2,2,2))
+        shape:new CANNON.Box(new CANNON.Vec3(2,2,2)),
+        collisionFilterGroup:1,
+        collisionFilterMask:2|4
     })
     arrow = new THREE.Mesh(new THREE.CylinderBufferGeometry(0,0.33,2,3),new THREE.MeshLambertMaterial({color:0xf6bd60}))
     //arrow.material.transparent = true
@@ -249,7 +251,9 @@ window.onload = function(){
     
     ground = new CANNON.Body({
         mass:0,
-        shape: new CANNON.Plane()
+        shape: new CANNON.Plane(),
+        collisionFilterGroup:4,
+        collisionFilterMask:1
     })
     ground.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
     ground.material=groundMaterial
@@ -258,7 +262,9 @@ window.onload = function(){
         var temp = new CANNON.Body({
             mass:0,
             shape: new CANNON.Plane(),
-            material:slideMaterial
+            material:slideMaterial,
+            collisionFilterGroup:4,
+            collisionFilterMask:1
         })
         i==0&&(temp.position.z=-110)
         i==1&&(temp.position.z=90,temp.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI))
@@ -277,17 +283,60 @@ window.onload = function(){
     }
 
     
+    roomBlock = function(x,z,r){
+        this.mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(15,5,3),
+            new THREE.MeshLambertMaterial({color:0x247ba0})
+        )
+        scene.add(this.mesh)
+        this.body = new CANNON.Body({
+            mass:0,
+            shape:new CANNON.Box(new CANNON.Vec3(7.5,2.5,1.5)),
+            material:groundMaterial,
+            collisionFilterGroup: 2,
+            collisionFilterMask: 1 
+        })
+        this.mesh.body = this.body
+        this.mesh.x = x
+        this.mesh.z = z
+        if(r){
+            this.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_Y,Math.PI/2)
+            this.mesh.quaternion.fromArray(this.body.quaternion.toArray())
+        }
+        world.add(this.body)
+        this.body.position.y = 2.5
+        this.mesh.update = function(){
+            //this.body.position.y = 2.5
+            
+            this.body.position.x -= (this.body.position.x-(player.body.position.x+this.x))*delta/2
+            this.body.position.z -= (this.body.position.z-(player.body.position.z+this.z))*delta/2
+            this.position.copy(this.body.position)
+        }
+    }
+    new roomBlock(12,-18)
+    new roomBlock(0,-18)
+    new roomBlock(-12,-18)
+    new roomBlock(-12,18)
+    new roomBlock(0,18)
+    new roomBlock(12,18)
+    new roomBlock(-18,12,true)
+    
+    
+    /*
     roomBlock = new THREE.Mesh(
-        new THREE.BoxGeometry(10,10,10),
+        new THREE.BoxGeometry(15,10,3),
         new THREE.MeshLambertMaterial({color:0x247ba0}))
     scene.add(roomBlock)
     roomBlock.body = new CANNON.Body({
         mass:0,
-        shape:new CANNON.Box(new CANNON.Vec3(5,5,5)),
+        shape:new CANNON.Box(new CANNON.Vec3(7.5,5,1.5)),
         material:groundMaterial
     })
+    roomBlock.update = function(){
+        roomBlock.position.copy(roomBlock.body.position)
+    }
     world.add(roomBlock.body)
-    
+    */
     
     
     skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
