@@ -75,6 +75,10 @@ window.onload = function(){
     jumpSound = new Howl({
         src:['jump.mp3']
     })
+    walldownSound = new Howl({
+        src:['walldown.mp3']
+    })
+    walldownSound.volume(0.45)
     
     
     
@@ -208,6 +212,22 @@ window.onload = function(){
             }
         }
     }
+    player.checkWall = function(){
+        if(player.launching){
+            for(i=0;i<world.contacts.length;i++){
+                if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
+                    player.launching==false
+                    try{
+                        world.contacts[i].bi.parentRef.friendlyDown()
+                    }catch(err){}
+                    try{
+                        world.contacts[i].bj.parentRef.friendlyDown()
+                    }catch(err){}
+                    break
+                }
+            }
+        }
+    }
     player.jump = function(){
         if(player.jumping==0){
             player.jumping = 20
@@ -307,7 +327,8 @@ window.onload = function(){
             this.mesh.quaternion.fromArray(this.body.quaternion.toArray())
         }
         world.add(this.body)
-        
+        this.body.parentRef = this
+        this.body.name = "roomBlock"
         this.body.position.set(x,3.5,z)
         //this.body.position.y = 3.5
         this.mesh.update = function(){
@@ -318,7 +339,7 @@ window.onload = function(){
                 tempSpeed=0
             }
             else if(player.body.position.y>=5 > 0){
-                tempSpeed = 0.25
+                tempSpeed = 0.4
             }
             else{
                 tempSpeed = 1.5
@@ -327,6 +348,32 @@ window.onload = function(){
             this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
             this.position.copy(this.body.position)
         }
+        this.hit = false
+        this.friendlyDown = function(){
+            if(this.hit==false){
+                console.log('hit')
+                this.hit = true
+                /*
+                walldownSound.pos(
+                    player.position.x,
+                    player.position.y,
+                    player.position.z
+                )*/
+                walldownSound.play()
+                /*
+                this.mesh.material.color.set(0xffffff)
+                new TWEEN.Tween(this.mesh.material.color)
+                    .to({r:0.1411764705882353,g:0.4823529411764706,b:0.6274509803921569},100)
+                    .easing(TWEEN.Easing.Exponential.In)
+                    .start()
+                    */
+                new TWEEN.Tween(this.body.position)
+                    .to({y:-3.51},200)
+                    .easing(TWEEN.Easing.Circular.InOut)
+                    .start()
+            }
+        }
+        
     }
 
     new roomBlock(12,-18)
@@ -516,5 +563,6 @@ render = function(){
         }catch(err){}
     }
     player.checkJump()
+    player.checkWall()
     renderer.render(scene,camera)
 }
