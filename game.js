@@ -4,8 +4,10 @@ window.onload = function(){
     delta = clock.getDelta()
     world = new CANNON.World()
     world.gravity.set(0,-90,0)
-    renderer = new THREE.WebGLRenderer()
-    renderer.setClearColor(0xffffff)
+    renderer = new THREE.WebGLRenderer({alpha:true})
+    //renderer.shadowMap.enabled = true
+    //renderer.shadowMapType = 0
+    renderer.setClearColor(0xffffff,0)
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.domElement.style.position = "absolute"
     renderer.domElement.style.zindex = -100
@@ -77,24 +79,37 @@ window.onload = function(){
     player.jSpeed = 12
     player.jumping = 0
     player.jumpVelocity = 40
+    player.shoot = new THREE.Vector3(1,0,0)
+    player.shootTimer = 0
+    player.shooting = false
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
-    player.update = function(){/*
-        for(i=0;i<world.contacts.length;i++){
-            console.log('yes')
-            
-            if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
-                if(Math.abs(world.contacts[i].ni.y)>0.95){
-                    player.jumping = 0
-                    player.speed = player.mSpeed
+    player.update = function(){
+        player.shootTimer>0&&(player.shootTimer-=delta)
+        if(player.shooting&&player.shootTimer<=0){
+            for(i=0;i<3;i++){
+                var temp = arrow.clone()
+                temp.dir = player.shoot.clone()
+                temp.dir.setLength(1.4)
+                temp.dir.add(new THREE.Vector3(
+                    Math.random()*0.1-0.05,
+                    Math.random()*0.01-0.005,
+                    Math.random()*0.1-0.05))
+                temp.life = 1
+                temp.update = function(){
+                    this.position.sub(this.dir)
+                    this.life-=delta
+                    this.life<=0&&scene.remove(this)
                 }
+                scene.add(temp)
             }
-            
-        }*/
+            player.shootTimer=0.1
+        }
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
         temp.normalize()
+        player.shoot.copy(temp)
         var temp2 = new CANNON.Vec3()
         if(player.up==1){
             temp2=temp2.vsub(temp)
@@ -124,17 +139,15 @@ window.onload = function(){
         temp.setLength(1.67)
         arrow.position.sub(temp)
         arrow.rotation.z = s.theta
-        //arrow.rotation.y+=Math.PI*delta
         player.dampPos.x -= (player.dampPos.x-player.position.x)*delta*2
         player.dampPos.y -=(player.dampPos.y-player.position.y)*delta*2
         player.dampPos.z -= (player.dampPos.z-player.position.z)*delta*2
-        
     }
     player.checkJump = function(){
         player.jumping > 1 && player.jumping--
         if(player.jumping == 1){
             for(i=0;i<world.contacts.length;i++){
-                if(world.contacts[i].bi == ground.body || world.contacts[i].bj == ground.body){
+                if(world.contacts[i].bi == ground0.body || world.contacts[i].bj == ground0.body){
                     if(world.contacts[i].bi == player.body || world.contacts[i].bj == player.body){
                         player.jumping = 0
                         player.speed = player.mSpeed
@@ -152,21 +165,36 @@ window.onload = function(){
     }
     scene.add(player)
     
-    ground = new THREE.Mesh(
-            new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshLambertMaterial({color:0xbbccff})
+    ground0 = new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(20,20),
+            new THREE.MeshLambertMaterial({color:0xf7ede2})
     )
-    ground.rotation.x = Math.PI*-0.5
-    scene.add(ground)
+    ground0.rotation.x = Math.PI*-0.5
+    ground1 = ground0.clone()
+    ground2 = ground0.clone()
+    ground3 = ground0.clone()
+    ground1.material = new THREE.MeshLambertMaterial({color:0xf5cac3})
+    ground2.material = new THREE.MeshLambertMaterial({color:0x84a59d})
+    ground3.material = new THREE.MeshLambertMaterial({color:0xf7edf0})
+    scene.add(ground0)
+    ground1.position.x+=20
+    scene.add(ground1)
+    ground2.position.z+=20
+    scene.add(ground2)
+    ground3.position.x+=20
+    ground3.position.z+=20
+    scene.add(ground3)
     
-    ground.body = new CANNON.Body({
+    
+    ground0.body = new CANNON.Body({
         mass:0,
         shape: new CANNON.Plane()
     })
-    ground.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
-    world.add(ground.body)
     
-    skyLight = new THREE.DirectionalLight(0xffffff, 1)
+    ground0.body.quaternion.setFromAxisAngle(CANNON.Vec3.UNIT_X,Math.PI*-0.5)
+    world.add(ground0.body)
+    
+    skyLight = new THREE.DirectionalLight(0xffffff, 0.8)
     skyLight.position.set(1,2,1)
     scene.add(skyLight)
     ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
@@ -175,6 +203,9 @@ window.onload = function(){
     floorLight.position.set(-1,-2,-1)
     scene.add(floorLight)
     
+    
+    //player.castShadow = true
+    //skyLight.castShadow = true
     document.addEventListener('keydown',function(e){
         e.preventDefault()
         e = e || window.event
@@ -206,7 +237,7 @@ window.onload = function(){
                 console.log(e)
         }
     })
-     document.addEventListener('keyup',function(e){
+    document.addEventListener('keyup',function(e){
         e.preventDefault()
         e = e || window.event
         e = e.which || e.keyCode
@@ -229,13 +260,24 @@ window.onload = function(){
                 break
         }
     })   
-    
+    document.addEventListener('mousedown',function(e){
+        player.shooting = true
+    })
+    document.addEventListener('mouseup',function(e){
+        player.shooting = false
+    })
     
     render()
 }
-
+animate = true
+window.addEventListener('blur',function(){animate = false})
+window.addEventListener('focus',function(){
+    animate = true
+    delta = clock.getDelta()
+    render()
+})
 render = function(){
-    requestAnimationFrame(render)
+    animate&&requestAnimationFrame(render)
     delta = clock.getDelta()
     TWEEN.update()
     world.step(1/60,delta,10)
