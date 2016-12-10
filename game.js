@@ -58,7 +58,16 @@ window.onload = function(){
         new THREE.BoxGeometry(1, 1, 1),
         new THREE.MeshLambertMaterial({color:0xdddddd})
     )
+    player.speed = 20
     scene.add(player)
+    
+    ground = new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(10,10),
+            new THREE.MeshLambertMaterial({color:0xffdddd})
+    )
+    ground.rotation.x = Math.PI*-0.5
+    scene.add(ground)
+    
     orbit = new THREE.OrbitControls(camera)
     skyLight = new THREE.DirectionalLight(0xffffff, 1)
     skyLight.position.set(1,2,1)
@@ -68,6 +77,41 @@ window.onload = function(){
     floorLight = new THREE.DirectionalLight(0xffffff, 0.1)
     floorLight.position.set(0,-1,0)
     scene.add(floorLight)
+    
+    document.addEventListener('keydown',function(e){
+        e.preventDefault()
+        e = e || window.event
+        e = e.which || e.keyCode
+        switch(e){
+            case 65:
+                player.position.x-=delta*player.speed
+                camera.position.x-=delta*player.speed
+                break
+            case 68:
+                player.position.x+=delta*player.speed
+                camera.position.x+=delta*player.speed
+                break
+            case 87:
+                player.position.z-=delta*player.speed
+                camera.position.z-=delta*player.speed
+                break
+            case 83:
+                player.position.z+=delta*player.speed
+                camera.position.z+=delta*player.speed
+                break
+            case 32:
+                //jump
+                break
+            case 80:
+                location.reload()
+                break
+            default:
+                console.log(e)
+        }
+    })
+    
+    
+    
     render()
 }
 
