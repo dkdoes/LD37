@@ -10,10 +10,37 @@ window.onload = function(){
     renderer.domElement.style.position = "absolute"
     renderer.domElement.style.zindex = -100
     document.body.appendChild(renderer.domElement)
+    renderer.domElement.addEventListener('click',function(){
+        renderer.domElement.requestPointerLock()
+    })
+    document.addEventListener('pointerlockchange', lockChangeAlert, false)
+    document.addEventListener('mozpointerlockchange', lockChangeAlert, false)
+
+    function lockChangeAlert(){
+        if (document.pointerLockElement === renderer.domElement ||
+            document.mozPointerLockElement === renderer.domElement){
+            console.log('The pointer lock status is now locked')
+            document.addEventListener("mousemove", updatePosition, false)
+        }else{
+            console.log('The pointer lock status is now unlocked')
+            document.removeEventListener("mousemove", updatePosition, false)
+        }
+    }
+    
+    function updatePosition(e) {
+        mouse.x += e.movementX
+        mouse.y += e.movementY
+        mouse.dX = e.movementX
+        mouse.dY = e.movementY
+    }
+    
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
     camera.position.set(0,10,10)
+    mouse = new THREE.Vector2()
+    mouse.dX = 0
+    mouse.dY = 0
     camera.update = function(){
-        camera.lookAt(player.position)
+        //camera.lookAt(player.position)
     }
     scene.add(camera)
     resize = function(e){
@@ -32,6 +59,7 @@ window.onload = function(){
         new THREE.MeshLambertMaterial({color:0xdddddd})
     )
     scene.add(player)
+    orbit = new THREE.OrbitControls(camera)
     skyLight = new THREE.DirectionalLight(0xffffff, 1)
     skyLight.position.set(1,2,1)
     scene.add(skyLight)
