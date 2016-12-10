@@ -3,7 +3,7 @@ window.onload = function(){
     clock = new THREE.Clock()
     delta = clock.getDelta()
     world = new CANNON.World()
-    world.gravity.set(0,-80,0)
+    world.gravity.set(0,-90,0)
     renderer = new THREE.WebGLRenderer()
     renderer.setClearColor(0xffffff)
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -31,7 +31,7 @@ window.onload = function(){
     function updatePosition(e) {
         s.theta -= e.movementX / 100
         s.phi -= e.movementY / 100
-        s.phi = Math.min(1.55,s.phi)
+        s.phi = Math.max(0.1,Math.min(1.55,s.phi))
         s.makeSafe()
         so.setFromSpherical(s)
     }
@@ -58,15 +58,25 @@ window.onload = function(){
     window.dispatchEvent(new Event('resize'))
     player = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1, 1),
-        new THREE.MeshLambertMaterial({color:0xdddddd})
+        new THREE.MeshLambertMaterial({color:0x99aaff})
     )
     player.body = new CANNON.Body({
         mass:4,
         shape:new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5))
     })
+    arrow = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.03,0.33,2,6),new THREE.MeshLambertMaterial({color:0x9988dd}))
+    arrow.material.transparent = true
+    arrow.material.opacity = 0.7
+    arrow.rotation.x=Math.PI/-2
+    scene.add(arrow)
     player.body.position.y = 4
+    player.body.angularDamping = 0.9
     world.add(player.body)
-    player.speed = 10
+    player.speed = 15
+    player.mSpeed = 15
+    player.jSpeed = 12
+    player.jumping = 1
+    player.jumpVelocity = 40
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
@@ -95,19 +105,29 @@ window.onload = function(){
             player.body.velocity.x = temp2.x
             player.body.velocity.z = temp2.z
         }
+        
+        
         player.quaternion.fromArray(player.body.quaternion.toArray())
         player.position.copy(player.body.position)
-        player.dampPos.x -= (player.dampPos.x-player.position.x)*delta*10
-        player.dampPos.y -=(player.dampPos.y-player.position.y)*delta*3
-        player.dampPos.z -= (player.dampPos.z-player.position.z)*delta*10
+        arrow.position.copy(player.position)
+        temp.setLength(1.67)
+        arrow.position.sub(temp)
+        arrow.rotation.z = s.theta
+        //arrow.rotation.y+=Math.PI*delta
+        player.dampPos.x -= (player.dampPos.x-player.position.x)*delta*2
+        player.dampPos.y -=(player.dampPos.y-player.position.y)*delta*2
+        player.dampPos.z -= (player.dampPos.z-player.position.z)*delta*2
+    }
+    player.jump = function(){
+        player.body.velocity.y = player.jumpVelocity
+        player.speed = player.jSpeed
     }
     scene.add(player)
     
     ground = new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10),
-            new THREE.MeshLambertMaterial({color:0xffdddd})
+            new THREE.MeshLambertMaterial({color:0xbbccff})
     )
-    ground.material.side = THREE.DoubleSide
     ground.rotation.x = Math.PI*-0.5
     scene.add(ground)
     
@@ -149,7 +169,7 @@ window.onload = function(){
                 player.up == 1 && player.up++
                 break
             case 32:
-                //jump
+                player.jump()
                 break
             case 80:
                 location.reload()
