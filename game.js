@@ -94,7 +94,7 @@ window.onload = function(){
     
     player = new THREE.Mesh(
         new THREE.BoxGeometry(4, 4, 4),
-        new THREE.MeshLambertMaterial({color:0x99aaff})
+        new THREE.MeshLambertMaterial({color:0x324376})
     )
     player.body = new CANNON.Body({
         mass:4,
@@ -233,25 +233,18 @@ window.onload = function(){
     }
     scene.add(player)
     
-    ground0 = new THREE.Mesh(
-            new THREE.PlaneBufferGeometry(20,20),
-            new THREE.MeshLambertMaterial({color:0xf7ede2})
-    )
-    ground0.rotation.x = Math.PI*-0.5
-    ground1 = ground0.clone()
-    ground2 = ground0.clone()
-    ground3 = ground0.clone()
-    ground1.material = new THREE.MeshLambertMaterial({color:0xf5cac3})
-    ground2.material = new THREE.MeshLambertMaterial({color:0x84a59d})
-    ground3.material = new THREE.MeshLambertMaterial({color:0xf7edf0})
-    scene.add(ground0)
-    ground1.position.x+=20
-    scene.add(ground1)
-    ground2.position.z+=20
-    scene.add(ground2)
-    ground3.position.x+=20
-    ground3.position.z+=20
-    scene.add(ground3)
+    groundGeo = new THREE.PlaneBufferGeometry(20,20)
+    ground0mat = new THREE.MeshLambertMaterial({color:0xff928b})
+    ground1mat = new THREE.MeshLambertMaterial({color:0xfec3a6})
+    ground2mat = new THREE.MeshLambertMaterial({color:0xf5dd90})
+    ground3mat = new THREE.MeshLambertMaterial({color:0xf68e5f})
+    ground4mat = new THREE.MeshLambertMaterial({color:0xefe9ae})
+    groundMats = [ground0mat,ground1mat,ground2mat,ground3mat,ground4mat]
+    
+    //enemycolors
+    // ef476f
+    // f76c5e
+    // f68e5f
     
     
     ground = new CANNON.Body({
@@ -262,6 +255,15 @@ window.onload = function(){
     ground.material=groundMaterial
     world.add(ground)
     
+    
+    for(x=0;x<10;x++){
+        for(z=0;z<10;z++){
+            var temp = new THREE.Mesh(groundGeo,groundMats[parseInt(Math.random()*5)])
+            temp.rotation.x = Math.PI*-0.5
+            temp.position.set((x-5)*20,0,(z-5)*20)
+            scene.add(temp)
+        }
+    }
 
     
     
@@ -392,7 +394,7 @@ window.onload = function(){
             .easing(TWEEN.Easing.Exponential.Out)
             .start()
         player.scaleTween.color = new TWEEN.Tween(player.material.color)
-            .to({r:0.6,g:0.666,b:1},100)
+            .to({r:0.196,g:0.2627,b:0.4627},100)
             .easing(TWEEN.Easing.Exponential.Out)
             .start()
     })
