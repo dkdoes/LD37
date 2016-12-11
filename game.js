@@ -312,7 +312,7 @@ window.onload = function(){
             player.body.material = groundMaterial
             player.canMove = true
             player.launching = false
-        },300*(0.7/player.scaleFactor))
+        },600*(0.7/player.scaleFactor))
         /*
         setTimeout(function(){
             player.launching = false
@@ -440,7 +440,32 @@ window.onload = function(){
             this.position.copy(this.body.position)
         }
         this.attack = function(){}
-        this.kill = function(){}
+        this.killed = false
+        this.kill = function(){
+            if (this.killed == false){
+                this.killed = true
+                this.body.collisionFilterMask = 4
+                var temp = this.body.position.vsub(player.body.position)
+                temp.normalize()
+                this.body.velocity = temp.mult(100)
+                new TWEEN.Tween(this.mesh.scale)
+                    .to({x:4,y:4,z:4},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .start()
+                this.mesh.material = this.mesh.material.clone()
+                this.mesh.material.transparent = true
+                this.mesh.material.parentRef = this
+                new TWEEN.Tween(this.mesh.material)
+                    .to({opacity:0},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .onComplete(function(){
+                        world.remove(this.parentRef.body)
+                        scene.remove(this.parentRef.mesh)
+                        delete this.parentRef
+                    })
+                    .start()
+            }
+        }
         this.hit = function(){}
     }
     new octEnemy()
@@ -500,22 +525,20 @@ window.onload = function(){
         this.kill = function(){
             if (this.killed == false){
                 this.killed = true
-                //this.body.mass = 0.01
                 this.body.collisionFilterMask = 4
                 var temp = this.body.position.vsub(player.body.position)
                 temp.normalize()
-                //temp.y=0
                 this.body.velocity = temp.mult(100)
                 new TWEEN.Tween(this.mesh.scale)
-                    .to({x:4,y:4,z:4},1000)
-                    .easing(TWEEN.Easing.Circular.InOut)
+                    .to({x:4,y:4,z:4},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
                     .start()
                 this.mesh.material = this.mesh.material.clone()
                 this.mesh.material.transparent = true
                 this.mesh.material.parentRef = this
                 new TWEEN.Tween(this.mesh.material)
-                    .to({opacity:0},1000)
-                    .easing(TWEEN.Easing.Circular.InOut)
+                    .to({opacity:0},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
                     .onComplete(function(){
                         world.remove(this.parentRef.body)
                         scene.remove(this.parentRef.mesh)
@@ -803,7 +826,10 @@ window.onload = function(){
             try{
                 powerupSound.fade(0.15,0,100,player.powerupfade)
             }catch(err){}
-            if(player.scaleFactor<0.8){launchSound.play()}
+            if(player.scaleFactor<0.8){
+                var temp = launchSound.play()
+                launchSound.rate(1.1-(player.scaleFactor/2),temp)
+            }
             try{
                 player.scaleTween.mesh.stop()
                 player.scaleTween.body.stop()
