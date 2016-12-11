@@ -282,7 +282,7 @@ window.onload = function(){
             player.score += 5 * saved
         }
         player.saved = saved
-        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Saved: '+saved+' / '+dudes.length+'<br>Kills: '+player.kills+player.tutorialText
+        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Captured: '+saved+' / '+dudes.length+'<br>Kills: '+player.kills+player.tutorialText
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -418,7 +418,11 @@ window.onload = function(){
             }
         }
     }
-    new dude()
+    for(var i=0;i<5;i++){
+        var temp = new dude()
+        temp.body.position.x = 60
+        temp.body.position.z = 60
+    }
     
     //octEnemies = []
     octEnemyGeo = new THREE.OctahedronGeometry(2)
@@ -498,7 +502,6 @@ window.onload = function(){
         }
         this.hit = function(){}
     }
-    new octEnemy()
     
     
     tetraGeo = new THREE.TetrahedronGeometry(3)
@@ -587,7 +590,6 @@ window.onload = function(){
         }
         this.hit = function(){}
     }
-    new tetraEnemy()
     
     
     
@@ -952,6 +954,7 @@ render = function(){
     if (player.wave == 0){
         if (player.saved >= 3){
             player.wave = 1
+            player.tutorialText = '<br><br>Your score increases by 5 points per second for each sphere you have.<br><br>You also get points for destroying enemies.<br><br>Enemies will destroy your spheres, and they\'ll lower your walls.<br><br>The game ends if they destroy all of the spheres on the map.'
         }
     }
     enemyCheck()
