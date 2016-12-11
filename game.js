@@ -570,16 +570,16 @@ window.onload = function(){
                 this.moveTimer -= delta
             }
             else{
-                this.moveTimer = 0.5 + Math.random()*0.5
+                this.moveTimer = 2 + Math.random()*0.5
                 temp = new CANNON.Vec3(Math.sin(Math.random()*Math.PI*2),0,Math.sin(Math.random()*Math.PI*2))
                 temp.normalize()
                 this.body.applyImpulse(temp.mult(100),this.body.position)
             }
-            if(Math.random()<delta/5){
+            if(Math.random()<delta/7){
                 var temp = new CANNON.Vec3(room.room.x,0,room.room.z)
                 temp = temp.vsub(this.body.position)
                 temp.normalize()
-                this.body.applyImpulse(temp.mult(700),this.body.position)
+                this.body.applyImpulse(temp.mult(360),this.body.position)
             }
             this.quaternion.fromArray(this.body.quaternion.toArray())
             this.position.copy(this.body.position)
