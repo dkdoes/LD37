@@ -1008,6 +1008,11 @@ render = function(){
     if(player.wave>0&&dudes.length<=0){
         game_over = true
         song.stop()
+        var temp = document.getElementById('score')
+        temp.style.top = window.innerHeight / 2 - temp.offsetHeight/2
+        temp.style.left = window.innerWidth / 2 - temp.offsetWidth/2
+        temp.style.fontSize = "250%"
+        temp.style.textAlign = "center"
         player.tutorialText = '<br><br>GAME OVER'
     }
     enemyCheck()
