@@ -344,6 +344,95 @@ window.onload = function(){
         }
     }
     new dude()
+    
+    octEnemies = []
+    octEnemyGeo = new THREE.OctahedronGeometry(2)
+    octEnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
+    octEnemyShape = new CANNON.Sphere(2)
+    octEnemy = function(){
+        this.mesh = new THREE.Mesh(
+            octEnemyGeo,
+            octEnemyMat
+        )
+        this.body = new CANNON.Body({
+            mass:2,
+            shape:octEnemyShape,
+            material:groundMaterial,
+            collisionFilterGroup:1,
+            collisionFilterMask:1|2|4
+        })
+        this.body.position.y = 10
+        this.mesh.body = this.body
+        this.body.mesh = this.mesh
+        this.mesh.parentRef = this
+        this.body.parentRef = this
+        scene.add(this.mesh)
+        world.add(this.body)
+        octEnemies.push(this)
+        this.mesh.moveTimer = 0
+        this.mesh.update = function(){
+            //console.log(this.moveTimer)
+            
+            //this.body.position.x+=delta
+            if(this.moveTimer >= 0){
+                this.moveTimer -= delta
+            }
+            else{
+                this.moveTimer = 1 + Math.random()
+                
+                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                console.log(temp)
+                temp = temp.vsub(this.body.position)
+                console.log(temp)
+                temp.normalize()
+                console.log(temp)
+                this.body.applyImpulse(temp.mult(16),this.body.position)
+                
+            }
+            
+            this.position.copy(this.body.position)
+        }
+        this.attack = function(){}
+        this.kill = function(){}
+        this.hit = function(){}
+    }
+    new octEnemy()
+    
+    /*    TEMPLATE
+    octEnemies = []
+    octEnemyGeo = new THREE.OctahedronBufferGeometry(2)
+    octEnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
+    octEnemyShape = new CANNON.Sphere(2)
+    octEnemy = function(){
+        this.mesh = new THREE.Mesh(
+            octEnemyGeo,
+            octEnemyMat
+        )
+        this.body = new CANNON.Body({
+            mass:2,
+            shape:octEnemyShape,
+            material:groundMaterial,
+            collisionFilterGroup:1,
+            collisionFilterMask:1|2|4
+        })
+        this.mesh.body = this.body
+        this.body.mesh = this.mesh
+        this.mesh.parentRef = this
+        this.body.parentRef = this
+        scene.add(this.mesh)
+        world.add(this.body)
+        octEnemies.push(this)
+        this.mesh.update = function(){
+            this.quaternion.fromArray(this.body.quaternion.toArray())
+            this.position.copy(this.body.position)
+        }
+        this.attack = function(){}
+        this.kill = function(){}
+        this.hit = function(){}
+    }
+    */
+    
+    
     ground = new CANNON.Body({
         mass:0,
         shape: new CANNON.Plane(),
