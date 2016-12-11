@@ -246,17 +246,19 @@ window.onload = function(){
         }
     }
     player.checkLaunch = function(){
-        if(player.launching==true && player.body.velocity.length() >= 40){
+        if(player.launching==true /*&& player.body.velocity.length() >= 40*/){
+            var velocity = player.body.velocity.length()
             for(var i=0;i<world.contacts.length;i++){
                 var target = false
                 world.contacts[i].bi == player.body && (target = world.contacts[i].bj)
                 world.contacts[i].bj == player.body && (target = world.contacts[i].bi)
                 if(target){
-                    if(target.name == 'roomBlock'){
+                    if(target.name == 'roomBlock' && velocity >= 10){
+                        //console.log(player.body.velocity.length())
                         target.parentRef.friendlyDown()
                     }
-                    else if(target.name == 'enemy'){
-                        target.parentRef.kill()
+                    else if(target.name == 'enemy' && velocity >= 40){
+                        target.parentRef.kill(true)
                     }
                 }
             }
@@ -458,16 +460,20 @@ window.onload = function(){
         this.attack = function(){}
         this.damage = 5
         this.killed = false
-        this.kill = function(){
+        this.kill = function(playerHit){
             if (this.killed == false){
                 this.killed = true
                 player.score += 100
                 player.kills++
                 enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
-                var temp = this.body.position.vsub(player.body.position)
-                temp.normalize()
-                this.body.velocity = temp.mult(100)
+                if(playerHit){
+                    //var temp = this.body.position.vsub(player.body.position)
+                    //temp.normalize()
+                    var temp = player.body.velocity.clone()
+                    temp.normalize()
+                    this.body.velocity = temp.mult(100)
+                }
                 new TWEEN.Tween(this.mesh.scale)
                     .to({x:4,y:4,z:4},1500)
                     .easing(TWEEN.Easing.Exponential.Out)
@@ -543,16 +549,20 @@ window.onload = function(){
         }
         this.damage = 5
         this.killed = false
-        this.kill = function(){
+        this.kill = function(playerHit){
             if (this.killed == false){
                 this.killed = true
                 player.score += 100
                 player.kills++
                 enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
-                var temp = this.body.position.vsub(player.body.position)
-                temp.normalize()
-                this.body.velocity = temp.mult(100)
+                if(playerHit){
+                    //var temp = this.body.position.vsub(player.body.position)
+                    //temp.normalize()
+                    var temp = player.body.velocity.clone()
+                    temp.normalize()
+                    this.body.velocity = temp.mult(100)
+                }
                 new TWEEN.Tween(this.mesh.scale)
                     .to({x:4,y:4,z:4},1500)
                     .easing(TWEEN.Easing.Exponential.Out)
@@ -684,7 +694,7 @@ window.onload = function(){
                 this.mesh.timer = 5
                 walldownSound.play()
                 new TWEEN.Tween(this.body.position)
-                    .to({y:-3.51},200)
+                    .to({y:-4},200)
                     .easing(TWEEN.Easing.Circular.InOut)
                     .start()
             }
@@ -696,7 +706,7 @@ window.onload = function(){
                 this.mesh.timer = 30
                 walldownSound.play()
                 new TWEEN.Tween(this.body.position)
-                    .to({y:-3.51},200)
+                    .to({y:-4},200)
                     .easing(TWEEN.Easing.Circular.InOut)
                     .start()
             }
@@ -706,7 +716,7 @@ window.onload = function(){
         this.takeDamage = function(d){
             if(this.invincible<=0){
                 this.damage+=d
-                this.invincible = 2
+                this.invincible = 0.1
                 if(this.damage>=10){
                     this.enemyDown()
                 }
@@ -762,6 +772,7 @@ window.onload = function(){
             if(attacker){
                 if(target.name == 'roomBlock'){
                     target.parentRef.takeDamage(attacker.parentRef.damage)
+                    attacker.parentRef.kill()
                 }
                 else if(target.name == 'dude'){
                     target.parentRef.kill()
