@@ -212,7 +212,7 @@ window.onload = function(){
         }
         temp2.normalize()
         if(player.canMove&&temp2.norm()!=0){
-            temp2=temp2.mult(player.speed*player.scaleFactor)
+            temp2=temp2.mult(player.speed*(1 / (2 - player.scaleFactor)))
             player.body.velocity.x = temp2.x
             player.body.velocity.z = temp2.z
         }
@@ -268,7 +268,7 @@ window.onload = function(){
     player.jump = function(){
         if(player.jumping==0){
             player.jumping = 20
-            player.body.velocity.y = player.jumpVelocity//*player.scaleFactor
+            player.body.velocity.y = player.jumpVelocity*(2 / (3 - player.scaleFactor))
             player.speed = player.jSpeed
             jumpSound.play()
         }
@@ -284,9 +284,12 @@ window.onload = function(){
         player.body.velocity.set(temp.x*-1,0,temp.z*-1)
         setTimeout(function(){
             player.body.material = groundMaterial
-            player.canMove = true
+            //player.canMove = true
             player.launching = false
         },600*(0.7/player.scaleFactor))
+        setTimeout(function(){
+            player.canMove = true
+        },200*(0.7/player.scaleFactor))
     }
     scene.add(player)
     
