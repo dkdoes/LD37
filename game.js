@@ -10,7 +10,7 @@ window.onload = function(){
     renderer.domElement.style.position = "absolute"
     renderer.domElement.style.zindex = 0
     document.body.appendChild(renderer.domElement)
-    renderer.domElement.addEventListener('click',function(){
+    window.addEventListener('click',function(){
         renderer.domElement.requestPointerLock()
     })
     document.addEventListener('pointerlockchange', lockChangeAlert, false)
@@ -265,7 +265,10 @@ window.onload = function(){
         }
     }
     player.score = 0
+    player.wave = 0
+    player.saved = 0
     player.scoreTimer = 1
+    player.tutorialText = '<br><br>Use the WASD keys to move and the spacebar to jump.<br><br>Hold down the left mouse button to charge up, release it to attack.<br><br>You can temporarily lower the walls of your room by attacking them.<br><br>Capture three of the green spheres to continue.'
     player.checkScore = function(){
         var saved = 0
         for(i=0;i<dudes.length;i++){
@@ -278,7 +281,8 @@ window.onload = function(){
             player.scoreTimer += 1
             player.score += 5 * saved
         }
-        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Saved: '+saved+' / '+dudes.length+'<br>Kills: '+player.kills
+        player.saved = saved
+        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Saved: '+saved+' / '+dudes.length+'<br>Kills: '+player.kills+player.tutorialText
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -463,13 +467,13 @@ window.onload = function(){
         this.kill = function(playerHit){
             if (this.killed == false){
                 this.killed = true
-                player.score += 100
-                player.kills++
                 enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
                 if(playerHit){
                     //var temp = this.body.position.vsub(player.body.position)
                     //temp.normalize()
+                    player.score += 100
+                    player.kills++
                     var temp = player.body.velocity.clone()
                     temp.normalize()
                     this.body.velocity = temp.mult(100)
@@ -552,13 +556,13 @@ window.onload = function(){
         this.kill = function(playerHit){
             if (this.killed == false){
                 this.killed = true
-                player.score += 100
-                player.kills++
                 enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
                 if(playerHit){
                     //var temp = this.body.position.vsub(player.body.position)
                     //temp.normalize()
+                    player.score += 100
+                    player.kills++
                     var temp = player.body.velocity.clone()
                     temp.normalize()
                     this.body.velocity = temp.mult(100)
@@ -945,6 +949,11 @@ render = function(){
     player.checkScore()
     player.checkJump()
     player.checkLaunch()
+    if (player.wave == 0){
+        if (player.saved >= 3){
+            player.wave = 1
+        }
+    }
     enemyCheck()
     renderer.render(scene,camera)
 }
