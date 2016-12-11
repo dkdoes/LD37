@@ -242,7 +242,7 @@ window.onload = function(){
         }
     }
     player.checkLaunch = function(){
-        if(player.launching==true && player.body.velocity.length() >= 20){
+        if(player.launching==true && player.body.velocity.length() >= 40){
             for(var i=0;i<world.contacts.length;i++){
                 var target = false
                 world.contacts[i].bi == player.body && (target = world.contacts[i].bj)
@@ -286,7 +286,7 @@ window.onload = function(){
             player.body.material = groundMaterial
             //player.canMove = true
             player.launching = false
-        },600*(0.7/player.scaleFactor))
+        },350*(0.9/player.scaleFactor))
         setTimeout(function(){
             player.canMove = true
         },200*(0.7/player.scaleFactor))
@@ -476,7 +476,7 @@ window.onload = function(){
                 this.moveTimer -= delta
             }
             else{
-                this.moveTimer = 1 + Math.random()
+                this.moveTimer = 1 + Math.random()*3
                 
                 //var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
                 //temp = temp.vsub(this.body.position)
@@ -491,7 +491,7 @@ window.onload = function(){
             var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
             temp = temp.vsub(this.body.position)
             temp.normalize()
-            this.body.applyImpulse(temp.mult(200),this.body.position)
+            this.body.applyImpulse(temp.mult(300),this.body.position)
         }
         this.killed = false
         this.kill = function(){
