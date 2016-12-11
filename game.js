@@ -90,7 +90,7 @@ window.onload = function(){
     })
     saveSound = new Howl({
         src:['save.mp3'],
-        volume:0.45
+        volume:1
     })
     loseSound = new Howl({
         src:['lose.mp3'],
@@ -241,7 +241,7 @@ window.onload = function(){
         if(player.launching==true){
             for(i=0;i<world.contacts.length;i++){
                 if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
-                    player.launching==false
+                    //player.launching==false
                     try{
                         world.contacts[i].bi.parentRef.friendlyDown()
                     }catch(err){}
@@ -349,7 +349,7 @@ window.onload = function(){
     }
     new dude()
     
-    octEnemies = []
+    //octEnemies = []
     octEnemyGeo = new THREE.OctahedronGeometry(2)
     octEnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
     octEnemyShape = new CANNON.Sphere(2)
@@ -372,12 +372,9 @@ window.onload = function(){
         this.body.parentRef = this
         scene.add(this.mesh)
         world.add(this.body)
-        octEnemies.push(this)
+        //octEnemies.push(this)
         this.mesh.moveTimer = 0
         this.mesh.update = function(){
-            //console.log(this.moveTimer)
-            
-            //this.body.position.x+=delta
             if(this.moveTimer >= 0){
                 this.moveTimer -= delta
             }
@@ -388,7 +385,6 @@ window.onload = function(){
                 temp = temp.vsub(this.body.position)
                 temp.normalize()
                 this.body.applyImpulse(temp.mult(16),this.body.position)
-                
             }
             
             this.position.copy(this.body.position)
@@ -398,6 +394,61 @@ window.onload = function(){
         this.hit = function(){}
     }
     new octEnemy()
+    
+    
+    tetraGeo = new THREE.TetrahedronGeometry(3)
+    tetraShape = new CANNON.ConvexPolyhedron(
+        tetraGeo.vertices.map(function(v){return new CANNON.Vec3(v.x,v.y,v.z)}),
+        tetraGeo.faces.map(function(f){return [f.a,f.b,f.c]}))
+    //tetraShape.computeEdges()
+    //tetraShape.computeNormals()
+    //tetraShape.updateBoundingSphereRadius()
+    
+    tetraMat = new THREE.MeshLambertMaterial({color:0xf68e5f})
+    tetraEnemy = function(){
+        this.mesh = new THREE.Mesh(
+            tetraGeo,
+            tetraMat
+        )
+        this.body = new CANNON.Body({
+            mass:2,
+            shape:tetraShape,
+            material:groundMaterial,
+            collisionFilterGroup:1,
+            collisionFilterMask:1|2|4
+        })
+        this.body.position.y = 10
+        this.mesh.body = this.body
+        this.body.mesh = this.mesh
+        this.mesh.parentRef = this
+        this.body.parentRef = this
+        scene.add(this.mesh)
+        world.add(this.body)
+        //octEnemies.push(this)
+        this.mesh.moveTimer = 0
+        this.mesh.update = function(){
+            if(this.moveTimer >= 0){
+                this.moveTimer -= delta
+            }
+            else{
+                this.moveTimer = 1 + Math.random()
+                
+                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                temp = temp.vsub(this.body.position)
+                temp.normalize()
+                this.body.applyImpulse(temp.mult(16),this.body.position)
+            }
+            this.quaternion.fromArray(this.body.quaternion.toArray())
+            this.position.copy(this.body.position)
+        }
+        this.attack = function(){}
+        this.kill = function(){}
+        this.hit = function(){}
+    }
+    new tetraEnemy()
+    
+    
+    
     
     /*    TEMPLATE
     octEnemies = []
