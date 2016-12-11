@@ -456,7 +456,7 @@ window.onload = function(){
             this.position.copy(this.body.position)
         }
         this.attack = function(){}
-        this.damage = 3
+        this.damage = 5
         this.killed = false
         this.kill = function(){
             if (this.killed == false){
@@ -541,7 +541,7 @@ window.onload = function(){
             temp.normalize()
             this.body.applyImpulse(temp.mult(300),this.body.position)
         }
-        this.damage = 3
+        this.damage = 5
         this.killed = false
         this.kill = function(){
             if (this.killed == false){
@@ -706,10 +706,26 @@ window.onload = function(){
         this.takeDamage = function(d){
             if(this.invincible<=0){
                 this.damage+=d
-                this.invincible = 1
+                this.invincible = 2
                 if(this.damage>=10){
                     this.enemyDown()
                 }
+                var temp = new TWEEN.Tween(roomBlockMat.color)
+                    .to({
+                        r:0.4,
+                        g:0.55,
+                        b:0.7
+                    },100)
+                    .easing(TWEEN.Easing.Exponential.In)
+                    .start()
+                var temp2 = new TWEEN.Tween(roomBlockMat.color)
+                    .to({
+                        r:0.1411764705882353,
+                        g:0.4823529411764706,
+                        b:0.6274509803921569
+                    },500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                temp.chain(temp2)
             }
         }
         this.heal = function(){
