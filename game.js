@@ -444,7 +444,7 @@ window.onload = function(){
     
     //octEnemies = []
     octEnemyGeo = new THREE.OctahedronGeometry(2)
-    octEnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
+    octEnemyMat = new THREE.MeshLambertMaterial({color:0xf68e5f})
     octEnemyShape = new CANNON.Sphere(2)
     octEnemy = function(){
         this.mesh = new THREE.Mesh(
@@ -526,6 +526,119 @@ window.onload = function(){
         }
         this.hit = function(){}
     }
+    
+    
+    
+    
+    
+    
+    oct2EnemyGeo = new THREE.OctahedronGeometry(3)
+    oct2EnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
+    oct2EnemyShape = new CANNON.ConvexPolyhedron(
+        oct2EnemyGeo.vertices.map(function(v){return new CANNON.Vec3(v.x,v.y,v.z)}),
+        oct2EnemyGeo.faces.map(function(f){return [f.a,f.b,f.c]}))
+    oct2Enemy = function(){
+        this.mesh = new THREE.Mesh(
+            oct2EnemyGeo,
+            oct2EnemyMat
+        )
+        this.body = new CANNON.Body({
+            mass:2,
+            shape:oct2EnemyShape,
+            material:groundMaterial,
+            collisionFilterGroup:1,
+            collisionFilterMask:1|2|4
+        })
+        this.body.position.set(Math.random()*160-90,15,Math.random()*160-90)
+        while(this.body.position.x>room.room.x-20&&this.body.position.x<room.room.x+20){
+            this.body.position.x=Math.random()*160-90
+        }
+        while(this.body.position.z>room.room.z-20&&this.body.position.z<room.room.z+20){
+            this.body.position.z=Math.random()*160-90
+        }
+        this.mesh.body = this.body
+        this.body.mesh = this.mesh
+        this.mesh.parentRef = this
+        this.body.parentRef = this
+        this.body.name = 'enemy'
+        scene.add(this.mesh)
+        world.add(this.body)
+        //octEnemies.push(this)
+        this.mesh.moveTimer = 0
+        this.mesh.update = function(){
+            if(this.moveTimer >= 0){
+                this.moveTimer -= delta
+            }
+            else{
+                this.moveTimer = 0.5 + Math.random()*0.5
+                temp = new CANNON.Vec3(Math.sin(Math.random()*Math.PI*2),0,Math.sin(Math.random()*Math.PI*2))
+                temp.normalize()
+                this.body.applyImpulse(temp.mult(100),this.body.position)
+            }
+            if(Math.random()<delta/5){
+                var temp = new CANNON.Vec3(room.room.x,0,room.room.z)
+                temp = temp.vsub(this.body.position)
+                temp.normalize()
+                this.body.applyImpulse(temp.mult(700),this.body.position)
+            }
+            this.quaternion.fromArray(this.body.quaternion.toArray())
+            this.position.copy(this.body.position)
+        }
+        this.attack = function(){}
+        this.damage = 11
+        this.killed = false
+        this.kill = function(playerHit){
+            if (this.killed == false){
+                this.killed = true
+                enemyDeathSound.play()
+                this.body.collisionFilterMask = 4
+                if(playerHit){
+                    //var temp = this.body.position.vsub(player.body.position)
+                    //temp.normalize()
+                    player.score += 100
+                    player.kills++
+                    var temp = player.body.velocity.clone()
+                    temp.normalize()
+                    this.body.velocity = temp.mult(100)
+                }
+                new TWEEN.Tween(this.mesh.scale)
+                    .to({x:4,y:4,z:4},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .start()
+                this.mesh.material = this.mesh.material.clone()
+                this.mesh.material.transparent = true
+                this.mesh.material.parentRef = this
+                new TWEEN.Tween(this.mesh.material)
+                    .to({opacity:0},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .onComplete(function(){
+                        world.remove(this.parentRef.body)
+                        scene.remove(this.parentRef.mesh)
+                        delete this.parentRef
+                    })
+                    .start()
+            }
+        }
+        this.hit = function(){}
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     tetraGeo = new THREE.TetrahedronGeometry(3)
@@ -864,7 +977,7 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                new tetraEnemy()
+                new oct2Enemy()
                 //new dude()
                 //location.reload()
                 break
