@@ -281,7 +281,7 @@ window.onload = function(){
             player.score += 5 * saved
         }
         player.saved = saved
-        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Spheres: '+saved+'<br>Kills: '+player.kills+player.tutorialText
+        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Kills: '+player.kills+player.tutorialText
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -861,7 +861,8 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                new dude()
+                new tetraEnemy()
+                //new dude()
                 //location.reload()
                 break
             default:
@@ -963,6 +964,7 @@ window.onload = function(){
     
     render()
 }
+game_over = false
 animate = true
 window.addEventListener('blur',function(){animate = false})
 window.addEventListener('focus',function(){
@@ -971,7 +973,7 @@ window.addEventListener('focus',function(){
     render()
 })
 render = function(){
-    animate&&requestAnimationFrame(render)
+    !game_over&&animate&&requestAnimationFrame(render)
     delta = clock.getDelta()
     sFix.theta -= (sFix.theta-s.theta)*delta*15
     sFix.phi -= (sFix.phi-s.phi)*delta*15
@@ -1001,6 +1003,12 @@ render = function(){
             player.tutorialText = ''
             song.play()
         }
+    }
+    
+    if(player.wave>0&&dudes.length<=0){
+        game_over = true
+        song.stop()
+        player.tutorialText = '<br><br>GAME OVER'
     }
     enemyCheck()
     renderer.render(scene,camera)
