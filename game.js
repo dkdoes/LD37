@@ -96,6 +96,10 @@ window.onload = function(){
         src:['lose.mp3'],
         volume:0.45
     })
+    enemyDeathSound = new Howl({
+        src:['enemyDeath.mp3'],
+        volume:0.45
+    })
     song = new Howl({
         src:['song0.mp3'],
         loop:true,
@@ -258,12 +262,21 @@ window.onload = function(){
             }
         }
     }
+    player.score = 0
+    player.scoreTimer = 1
     player.checkScore = function(){
-        var score = 0
+        var saved = 0
         for(i=0;i<dudes.length;i++){
-            dudes[i].safe==true && score++
+            dudes[i].safe==true && saved++
         }
-        document.getElementById('score').innerHTML='Score: '+score+'<br>Saved: '+score+' / '+dudes.length+'<br>Kills: '+player.kills
+        if (player.scoreTimer >0){
+            player.scoreTimer -= delta
+        }
+        else{
+            player.scoreTimer += 1
+            player.score += 5 * saved
+        }
+        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Saved: '+saved+' / '+dudes.length+'<br>Kills: '+player.kills
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -416,6 +429,9 @@ window.onload = function(){
         this.kill = function(){
             if (this.killed == false){
                 this.killed = true
+                player.score += 100
+                player.kills++
+                enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
                 var temp = this.body.position.vsub(player.body.position)
                 temp.normalize()
@@ -497,6 +513,9 @@ window.onload = function(){
         this.kill = function(){
             if (this.killed == false){
                 this.killed = true
+                player.score += 100
+                player.kills++
+                enemyDeathSound.play()
                 this.body.collisionFilterMask = 4
                 var temp = this.body.position.vsub(player.body.position)
                 temp.normalize()
