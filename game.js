@@ -349,6 +349,7 @@ window.onload = function(){
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
         this.body.parentRef = this
+        this.body.name = 'dude'
         world.add(this.body)
         this.mesh.moveTimer = 0
         this.mesh.update = function(){
@@ -379,6 +380,36 @@ window.onload = function(){
                 loseSound.play()
             }
             this.safe = false
+        }
+        this.killed = false
+        this.kill = function(){
+            if (this.killed == false){
+                this.killed = true
+                //player.score += 100
+                //player.kills++
+                //enemyDeathSound.play()
+                this.body.collisionFilterMask = 4
+                //var temp = this.body.position.vsub(player.body.position)
+                //temp.normalize()
+                //this.body.velocity = temp.mult(100)
+                new TWEEN.Tween(this.mesh.scale)
+                    .to({x:4,y:4,z:4},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .start()
+                this.mesh.material = this.mesh.material.clone()
+                this.mesh.material.transparent = true
+                this.mesh.material.parentRef = this
+                new TWEEN.Tween(this.mesh.material)
+                    .to({opacity:0},1500)
+                    .easing(TWEEN.Easing.Exponential.Out)
+                    .onComplete(function(){
+                        world.remove(this.parentRef.body)
+                        scene.remove(this.parentRef.mesh)
+                        dudes.splice(dudes.indexOf(this.parentRef),1)
+                        delete this.parentRef
+                    })
+                    .start()
+            }
         }
     }
     new dude()
@@ -425,6 +456,7 @@ window.onload = function(){
             this.position.copy(this.body.position)
         }
         this.attack = function(){}
+        this.damage = 3
         this.killed = false
         this.kill = function(){
             if (this.killed == false){
@@ -509,6 +541,7 @@ window.onload = function(){
             temp.normalize()
             this.body.applyImpulse(temp.mult(300),this.body.position)
         }
+        this.damage = 3
         this.killed = false
         this.kill = function(){
             if (this.killed == false){
@@ -583,10 +616,12 @@ window.onload = function(){
     maxX=-90
     minZ=70
     maxZ=-90
+    roomBlockGeo = new THREE.BoxGeometry(15,7,3)
+    roomBlockMat = new THREE.MeshLambertMaterial({color:0x247ba0})
     roomBlock = function(x,z,r){
         this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(15,7,3),
-            new THREE.MeshLambertMaterial({color:0x247ba0})
+            roomBlockGeo,
+            roomBlockMat
         )
         scene.add(this.mesh)
         this.body = new CANNON.Body({
@@ -611,6 +646,8 @@ window.onload = function(){
         //this.body.position.y = 3.5
         this.mesh.update = function(){
             this.timer>0&&(this.timer-=delta)
+            this.parentRef.invincible>0&&(this.parentRef.invincible-=delta)
+            this.parentRef.damage>0&&(this.parentRef.damage-=delta)
             this.down&&this.timer<=0&&this.parentRef.heal()
             var tempX = Math.max(Math.min(minX,player.body.position.x),maxX)
             var tempZ = Math.max(Math.min(minZ,player.body.position.z),maxZ)
@@ -619,11 +656,9 @@ window.onload = function(){
                 tempSpeed=0
             }
             else if(player.body.position.y>=5 > 0){
-                //tempSpeed = 0.4
                 tempSpeed = 0.5
             }
             else{
-                //tempSpeed = 1.5
                 tempSpeed = 2.5
             }
             this.body.position.x -= (this.body.position.x-(tempX+this.x))*delta*tempSpeed
@@ -644,7 +679,6 @@ window.onload = function(){
         this.mesh.timer = 0
         this.friendlyDown = function(){
             if(this.mesh.down==false){
-                console.log('hit')
                 this.mesh.hit = true
                 this.mesh.down = true
                 this.mesh.timer = 5
@@ -653,6 +687,29 @@ window.onload = function(){
                     .to({y:-3.51},200)
                     .easing(TWEEN.Easing.Circular.InOut)
                     .start()
+            }
+        }
+        this.enemyDown = function(){
+            if(this.mesh.down==false){
+                this.mesh.hit = true
+                this.mesh.down = true
+                this.mesh.timer = 30
+                walldownSound.play()
+                new TWEEN.Tween(this.body.position)
+                    .to({y:-3.51},200)
+                    .easing(TWEEN.Easing.Circular.InOut)
+                    .start()
+            }
+        }
+        this.damage = 0
+        this.invincible = 0
+        this.takeDamage = function(d){
+            if(this.invincible<=0){
+                this.damage+=d
+                this.invincible = 1
+                if(this.damage>=10){
+                    this.enemyDown()
+                }
             }
         }
         this.heal = function(){
@@ -678,6 +735,24 @@ window.onload = function(){
     new roomBlock(18,-12,true)
     new roomBlock(18,0,true)
     new roomBlock(18,12,true)
+    
+    
+    enemyCheck = function(){
+        for(var i=0;i<world.contacts.length;i++){
+            var attacker = false
+            var target = false
+            world.contacts[i].bi.name == 'enemy' && (attacker = world.contacts[i].bi,target = world.contacts[i].bj)
+            world.contacts[i].bj.name == 'enemy' && (attacker = world.contacts[i].bj,target = world.contacts[i].bi)
+            if(attacker){
+                if(target.name == 'roomBlock'){
+                    target.parentRef.takeDamage(attacker.parentRef.damage)
+                }
+                else if(target.name == 'dude'){
+                    target.parentRef.kill()
+                }
+            }
+        }
+    }
     
     
     
@@ -842,7 +917,7 @@ render = function(){
     }
     player.checkScore()
     player.checkJump()
-    //player.checkWall()
     player.checkLaunch()
+    enemyCheck()
     renderer.render(scene,camera)
 }
