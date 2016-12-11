@@ -522,7 +522,13 @@ window.onload = function(){
             collisionFilterGroup:1,
             collisionFilterMask:1|2|4
         })
-        this.body.position.y = 10
+        this.body.position.set(Math.random()*160-90,15,Math.random()*160-90)
+        while(this.body.position.x>room.room.x-20&&this.body.position.x<room.room.x+20){
+            this.body.position.x=Math.random()*160-90
+        }
+        while(this.body.position.z>room.room.z-20&&this.body.position.z<room.room.z+20){
+            this.body.position.z=Math.random()*160-90
+        }
         this.mesh.body = this.body
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
@@ -531,7 +537,7 @@ window.onload = function(){
         scene.add(this.mesh)
         world.add(this.body)
         //octEnemies.push(this)
-        this.mesh.moveTimer = 0
+        this.mesh.moveTimer = 2
         this.mesh.update = function(){
             if(this.moveTimer >= 0){
                 this.moveTimer -= delta
@@ -829,7 +835,8 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                location.reload()
+                new tetraEnemy()
+                //location.reload()
                 break
             default:
                 console.log(e)
