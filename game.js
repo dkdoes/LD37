@@ -26,8 +26,8 @@ window.onload = function(){
             document.removeEventListener("mousemove", updatePosition, false)
         }
     }
-    s = new THREE.Spherical(25,1*Math.PI/4,0)
-    sFix = new THREE.Spherical(25,1*Math.PI/4,0)
+    s = new THREE.Spherical(50,1*Math.PI/4,0)
+    sFix = new THREE.Spherical(50,1*Math.PI/4,0)
     so = new THREE.Vector3(0,17.677669529663685,17.677669529663685)
     function updatePosition(e) {
         s.theta -= e.movementX / 400
@@ -68,34 +68,38 @@ window.onload = function(){
     
     
     launchSound = new Howl({
-        src:['launch.mp3']
+        src:['launch.mp3'],
+        volume:0.3
     })
     powerupSound = new Howl({
-        src:['powerup.mp3']
+        src:['powerup.mp3'],
+        volume:0.1,
+        rate:1.5
     })
     jumpSound = new Howl({
-        src:['jump.mp3']
+        src:['jump.mp3'],
+        volume:0.1
     })
     walldownSound = new Howl({
-        src:['walldown.mp3']
+        src:['walldown.mp3'],
+        volume:0.45
     })
-    walldownSound.volume(0.45)
     healSound = new Howl({
-        src:['heal.mp3']
+        src:['heal.mp3'],
+        volume:0.45
     })
-    healSound.volume(0.45)
     saveSound = new Howl({
-        src:['save.mp3']
+        src:['save.mp3'],
+        volume:0.45
     })
-    saveSound.volume(0.45)
     loseSound = new Howl({
-        src:['lose.mp3']
+        src:['lose.mp3'],
+        volume:0.45
     })
-    loseSound.volume(0.45)
     song = new Howl({
         src:['song0.mp3'],
         loop:true,
-        volume:0.35,
+        volume:1,
         autoplay:true
     })
     
@@ -165,7 +169,7 @@ window.onload = function(){
     player.left=0;player.right=0;player.up=0;player.down=0
     player.dampPos = player.position.clone()
     player.update = function(){
-        
+        /*
         powerupSound.pos(
             player.position.x,
             player.position.y,
@@ -181,7 +185,7 @@ window.onload = function(){
             player.position.y,
             player.position.z
         )
-        
+        */
         var temp = camera.position.clone()
         temp.sub(player.body.position)
         temp.y=0
@@ -381,11 +385,8 @@ window.onload = function(){
                 this.moveTimer = 1 + Math.random()
                 
                 var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
-                console.log(temp)
                 temp = temp.vsub(this.body.position)
-                console.log(temp)
                 temp.normalize()
-                console.log(temp)
                 this.body.applyImpulse(temp.mult(16),this.body.position)
                 
             }
@@ -668,7 +669,7 @@ window.onload = function(){
         if(e.button==0){
             player.launch()
             try{
-                powerupSound.fade(1,0,100,player.powerupfade)
+                powerupSound.fade(0.15,0,100,player.powerupfade)
             }catch(err){}
             if(player.scaleFactor<0.8){launchSound.play()}
             try{
