@@ -635,6 +635,7 @@ window.onload = function(){
     roomBlockGeo = new THREE.BoxGeometry(15,7,3)
     roomBlockMat = new THREE.MeshLambertMaterial({color:0x247ba0})
     roomBlock = function(x,z,r){
+        this.room = {x:0,z:0}
         this.mesh = new THREE.Mesh(
             roomBlockGeo,
             roomBlockMat
@@ -689,6 +690,7 @@ window.onload = function(){
                     dudes[i].lose()
                 }
             }
+        this.parentRef.room = {x:this.body.position.x - this.x,z:this.body.position.z-this.z}
         }
         this.mesh.hit = false
         this.mesh.down = false
@@ -755,7 +757,7 @@ window.onload = function(){
         
     }
 
-    new roomBlock(12,-18)
+    room = new roomBlock(12,-18)
     new roomBlock(0,-18)
     new roomBlock(-12,-18)
     new roomBlock(-12,18)
