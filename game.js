@@ -237,6 +237,7 @@ window.onload = function(){
             }
         }
     }
+    /*
     player.checkWall = function(){
         if(player.launching==true){
             for(i=0;i<world.contacts.length;i++){
@@ -250,6 +251,36 @@ window.onload = function(){
                     }catch(err){}
                     break
                 }
+            }
+        }
+    }
+    */
+    player.checkLaunch = function(){
+        if(player.launching==true && player.body.velocity.length() >= 20){
+            for(var i=0;i<world.contacts.length;i++){
+                var target = false
+                world.contacts[i].bi == player.body && (target = world.contacts[i].bj)
+                world.contacts[i].bj == player.body && (target = world.contacts[i].bi)
+                if(target){
+                    if(target.name == 'roomBlock'){
+                        target.parentRef.friendlyDown()
+                    }
+                    else if(target.name == 'enemy'){
+                        target.parentRef.kill()
+                    }
+                }
+                /*
+                if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
+                    //player.launching==false
+                    try{
+                        world.contacts[i].bi.parentRef.friendlyDown()
+                    }catch(err){}
+                    try{
+                        world.contacts[i].bj.parentRef.friendlyDown()
+                    }catch(err){}
+                    break
+                }
+                */
             }
         }
     }
@@ -280,10 +311,13 @@ window.onload = function(){
         setTimeout(function(){
             player.body.material = groundMaterial
             player.canMove = true
+            player.launching = false
         },300*(0.7/player.scaleFactor))
+        /*
         setTimeout(function(){
             player.launching = false
         },222*(0.7/player.scaleFactor))
+        */
     }
     scene.add(player)
     
@@ -310,9 +344,12 @@ window.onload = function(){
     //2cda9d
     //4da167
     dudes = []
+    
+    dudeGeo = new THREE.SphereBufferGeometry(2,12,10)
+
     dude = function(){
         this.mesh = new THREE.Mesh(
-            new THREE.SphereBufferGeometry(2,12,10),
+            dudeGeo,
             new THREE.MeshLambertMaterial({color:0x4da167})
         )
         scene.add(this.mesh)
@@ -328,7 +365,19 @@ window.onload = function(){
         this.mesh.parentRef = this
         this.body.parentRef = this
         world.add(this.body)
+        this.mesh.moveTimer = 0
         this.mesh.update = function(){
+            if(this.moveTimer >= 0){
+                this.moveTimer -= delta
+            }
+            else{
+                this.moveTimer = 1 + Math.random()
+                
+                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                temp = temp.vsub(this.body.position)
+                temp.normalize()
+                this.body.applyImpulse(temp.mult(50),this.body.position)
+            }
             this.quaternion.fromArray(this.body.quaternion.toArray())
             this.position.copy(this.body.position)
         }
@@ -370,6 +419,7 @@ window.onload = function(){
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
         this.body.parentRef = this
+        this.body.name = 'enemy'
         scene.add(this.mesh)
         world.add(this.body)
         //octEnemies.push(this)
@@ -381,12 +431,12 @@ window.onload = function(){
             else{
                 this.moveTimer = 1 + Math.random()
                 
-                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
-                temp = temp.vsub(this.body.position)
+                //var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                //temp = temp.vsub(this.body.position)
+                temp = new CANNON.Vec3(Math.sin(Math.random()*Math.PI*2),0,Math.sin(Math.random()*Math.PI*2))
                 temp.normalize()
-                this.body.applyImpulse(temp.mult(16),this.body.position)
+                this.body.applyImpulse(temp.mult(30),this.body.position)
             }
-            
             this.position.copy(this.body.position)
         }
         this.attack = function(){}
@@ -400,9 +450,6 @@ window.onload = function(){
     tetraShape = new CANNON.ConvexPolyhedron(
         tetraGeo.vertices.map(function(v){return new CANNON.Vec3(v.x,v.y,v.z)}),
         tetraGeo.faces.map(function(f){return [f.a,f.b,f.c]}))
-    //tetraShape.computeEdges()
-    //tetraShape.computeNormals()
-    //tetraShape.updateBoundingSphereRadius()
     
     tetraMat = new THREE.MeshLambertMaterial({color:0xf68e5f})
     tetraEnemy = function(){
@@ -413,7 +460,7 @@ window.onload = function(){
         this.body = new CANNON.Body({
             mass:2,
             shape:tetraShape,
-            material:groundMaterial,
+            material:slideMaterial,
             collisionFilterGroup:1,
             collisionFilterMask:1|2|4
         })
@@ -422,6 +469,7 @@ window.onload = function(){
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
         this.body.parentRef = this
+        this.body.name = 'enemy'
         scene.add(this.mesh)
         world.add(this.body)
         //octEnemies.push(this)
@@ -433,16 +481,49 @@ window.onload = function(){
             else{
                 this.moveTimer = 1 + Math.random()
                 
-                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
-                temp = temp.vsub(this.body.position)
-                temp.normalize()
-                this.body.applyImpulse(temp.mult(16),this.body.position)
+                //var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                //temp = temp.vsub(this.body.position)
+                //temp.normalize()
+                //this.body.applyImpulse(temp.mult(50),this.body.position)
+                this.parentRef.attack()
             }
             this.quaternion.fromArray(this.body.quaternion.toArray())
             this.position.copy(this.body.position)
         }
-        this.attack = function(){}
-        this.kill = function(){}
+        this.attack = function(){
+            var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+            temp = temp.vsub(this.body.position)
+            temp.normalize()
+            this.body.applyImpulse(temp.mult(200),this.body.position)
+        }
+        this.killed = false
+        this.kill = function(){
+            if (this.killed == false){
+                this.killed = true
+                //this.body.mass = 0.01
+                this.body.collisionFilterMask = 4
+                var temp = this.body.position.vsub(player.body.position)
+                temp.normalize()
+                //temp.y=0
+                this.body.velocity = temp.mult(100)
+                new TWEEN.Tween(this.mesh.scale)
+                    .to({x:4,y:4,z:4},1000)
+                    .easing(TWEEN.Easing.Circular.InOut)
+                    .start()
+                this.mesh.material = this.mesh.material.clone()
+                this.mesh.material.transparent = true
+                this.mesh.material.parentRef = this
+                new TWEEN.Tween(this.mesh.material)
+                    .to({opacity:0},1000)
+                    .easing(TWEEN.Easing.Circular.InOut)
+                    .onComplete(function(){
+                        world.remove(this.parentRef.body)
+                        scene.remove(this.parentRef.mesh)
+                        delete this.parentRef
+                    })
+                    .start()
+            }
+        }
         this.hit = function(){}
     }
     new tetraEnemy()
@@ -776,6 +857,7 @@ render = function(){
     }
     player.checkScore()
     player.checkJump()
-    player.checkWall()
+    //player.checkWall()
+    player.checkLaunch()
     renderer.render(scene,camera)
 }
