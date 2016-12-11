@@ -3,7 +3,7 @@ window.onload = function(){
     clock = new THREE.Clock()
     delta = clock.getDelta()
     world = new CANNON.World()
-    world.gravity.set(0,-90,0)
+    world.gravity.set(0,-270,0)
     renderer = new THREE.WebGLRenderer({alpha:true})
     renderer.setClearColor(0xffffff,0)
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -137,11 +137,15 @@ window.onload = function(){
     player.body.position.y = 10
     //player.body.angularDamping = 0.9
     world.add(player.body)
-    player.speed = 18
-    player.mSpeed = 18
-    player.jSpeed = 12
+    
+    player.mSpeed = 36
+    player.jSpeed = player.mSpeed * 3 / 4
+    player.speed = player.mSpeed
+    
+    player.launchSpeed = 53
+    
     player.jumping = 0
-    player.jumpVelocity = 40
+    player.jumpVelocity = 100
     
     
     
@@ -306,7 +310,7 @@ window.onload = function(){
         player.canMove = false
         player.body.material = slideMaterial
         var temp = player.shoot.clone()
-        temp.setLength(20*(1/player.scaleFactor))
+        temp.setLength(player.launchSpeed*(1/player.scaleFactor))
         player.body.velocity.set(temp.x*-1,0,temp.z*-1)
         setTimeout(function(){
             player.body.material = groundMaterial
