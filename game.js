@@ -10,9 +10,11 @@ window.onload = function(){
     renderer.domElement.style.position = "absolute"
     renderer.domElement.style.zindex = 0
     document.body.appendChild(renderer.domElement)
-    window.addEventListener('click',function(){
+    
+    pointerLock = function(){
         renderer.domElement.requestPointerLock()
-    })
+    }
+    window.addEventListener('click',pointerLock)
     document.addEventListener('pointerlockchange', lockChangeAlert, false)
     document.addEventListener('mozpointerlockchange', lockChangeAlert, false)
 
@@ -267,6 +269,7 @@ window.onload = function(){
     player.wave = 0
     player.saved = 0
     player.scoreTimer = 1
+    player.gameOverText = ''
     player.tutorialText = '<br><br>Use the WASD keys to move and the spacebar to jump.<br><br>Hold down the left mouse button to charge up, release it to attack.<br><br>You can temporarily lower the walls of your room by attacking them.<br><br>Capture all of the green spheres to continue.'
     player.checkScore = function(){
         var saved = 0
@@ -281,7 +284,7 @@ window.onload = function(){
             player.score += 5 * saved
         }
         player.saved = saved
-        document.getElementById('score').innerHTML='Score: '+player.score+'<br>Kills: '+player.kills+player.tutorialText
+        document.getElementById('score').innerHTML=player.gameOverText+'Score: '+player.score+'<br>Kills: '+player.kills+player.tutorialText
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -893,7 +896,7 @@ window.onload = function(){
         }
     })   
     document.addEventListener('mousedown',function(e){
-        if(e.button==0){
+        if(e.button==0 && !game_over){
             player.powerupfade = powerupSound.play()
             try{
                 player.scaleTween.mesh.stop()
@@ -1005,15 +1008,18 @@ render = function(){
         }
     }
     
-    if(player.wave>0&&dudes.length<=0){
+    if(dudes.length<=0){
         game_over = true
         song.stop()
         var temp = document.getElementById('score')
-        temp.style.top = window.innerHeight / 2 - temp.offsetHeight/2
+        temp.style.top = window.innerHeight / 3 - temp.offsetHeight/2
         temp.style.left = window.innerWidth / 2 - temp.offsetWidth/2
-        temp.style.fontSize = "250%"
+        temp.style.fontSize = "500%"
         temp.style.textAlign = "center"
-        player.tutorialText = '<br><br>GAME OVER'
+        player.gameOverText = 'GAME OVER<br><br>'
+        player.tutorialText = ''
+        document.exitPointerLock()
+        window.removeEventListener('click',pointerLock)
     }
     enemyCheck()
     renderer.render(scene,camera)
