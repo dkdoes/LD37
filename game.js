@@ -351,24 +351,40 @@ window.onload = function(){
             collisionFilterGroup:1,
             collisionFilterMask:1|2|4
         })
+        this.body.position.set(Math.random()*160-90,15,Math.random()*160-90)
+        while(this.body.position.x>room.room.x-20&&this.body.position.x<room.room.x+20){
+            this.body.position.x=Math.random()*160-90
+        }
+        while(this.body.position.z>room.room.z-20&&this.body.position.z<room.room.z+20){
+            this.body.position.z=Math.random()*160-90
+        }
         this.mesh.body = this.body
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
         this.body.parentRef = this
         this.body.name = 'dude'
         world.add(this.body)
-        this.mesh.moveTimer = 0
+        this.mesh.moveTimer = 1
+        this.mesh.spawnTimer = 1
         this.mesh.update = function(){
+            if(this.spawnTimer>=0){
+                this.spawnTimer-=delta
+            }
             if(this.moveTimer >= 0){
                 this.moveTimer -= delta
             }
             else{
-                this.moveTimer = 1 + Math.random()
-                
-                var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                this.moveTimer = 0.5 + Math.random()
+                //var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                //temp = temp.vsub(this.body.position)
+                //temp.normalize()
+                var temp = new CANNON.Vec3(room.room.x,0,room.room.z)
                 temp = temp.vsub(this.body.position)
                 temp.normalize()
-                this.body.applyImpulse(temp.mult(50),this.body.position)
+                this.body.applyImpulse(temp.mult(25+Math.random()*50),this.body.position)
+            }
+            if(this.parentRef.safe&&this.spawnTimer<0){
+                this.body.position.y = Math.min(this.body.position.y,4)
             }
             this.quaternion.fromArray(this.body.quaternion.toArray())
             this.position.copy(this.body.position)
@@ -376,16 +392,20 @@ window.onload = function(){
         this.safe = false
         dudes.push(this)
         this.save = function(){
-            if(this.safe == false){
-                saveSound.play()
+            if(this.mesh.spawnTimer<0){
+                if(this.safe == false){
+                    saveSound.play()
+                }
+                this.safe = true
             }
-            this.safe = true
         }
         this.lose = function(){
-            if(this.safe == true){
-                loseSound.play()
+            if(this.mesh.spawnTimer<0){
+                if(this.safe == true){
+                    loseSound.play()
+                }
+                this.safe = false
             }
-            this.safe = false
         }
         this.killed = false
         this.kill = function(){
@@ -418,11 +438,7 @@ window.onload = function(){
             }
         }
     }
-    for(var i=0;i<5;i++){
-        var temp = new dude()
-        temp.body.position.x = 60
-        temp.body.position.z = 60
-    }
+
     
     //octEnemies = []
     octEnemyGeo = new THREE.OctahedronGeometry(2)
@@ -440,7 +456,13 @@ window.onload = function(){
             collisionFilterGroup:1,
             collisionFilterMask:1|2|4
         })
-        this.body.position.y = 10
+        this.body.position.set(Math.random()*160-90,15,Math.random()*160-90)
+        while(this.body.position.x>room.room.x-20&&this.body.position.x<room.room.x+20){
+            this.body.position.x=Math.random()*160-90
+        }
+        while(this.body.position.z>room.room.z-20&&this.body.position.z<room.room.z+20){
+            this.body.position.z=Math.random()*160-90
+        }
         this.mesh.body = this.body
         this.body.mesh = this.mesh
         this.mesh.parentRef = this
@@ -776,6 +798,10 @@ window.onload = function(){
     new roomBlock(18,0,true)
     new roomBlock(18,12,true)
     
+    for(var i = 0;i<5;i++){
+        new dude()
+    }
+    
     
     enemyCheck = function(){
         for(var i=0;i<world.contacts.length;i++){
@@ -835,7 +861,7 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                new tetraEnemy()
+                new dude()
                 //location.reload()
                 break
             default:
