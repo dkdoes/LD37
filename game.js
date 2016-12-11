@@ -241,24 +241,6 @@ window.onload = function(){
             }
         }
     }
-    /*
-    player.checkWall = function(){
-        if(player.launching==true){
-            for(i=0;i<world.contacts.length;i++){
-                if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
-                    //player.launching==false
-                    try{
-                        world.contacts[i].bi.parentRef.friendlyDown()
-                    }catch(err){}
-                    try{
-                        world.contacts[i].bj.parentRef.friendlyDown()
-                    }catch(err){}
-                    break
-                }
-            }
-        }
-    }
-    */
     player.checkLaunch = function(){
         if(player.launching==true && player.body.velocity.length() >= 20){
             for(var i=0;i<world.contacts.length;i++){
@@ -273,18 +255,6 @@ window.onload = function(){
                         target.parentRef.kill()
                     }
                 }
-                /*
-                if((world.contacts[i].bi.name=="roomBlock"&&world.contacts[i].bj==player.body)||(world.contacts[i].bj.name=="roomBlock"&&world.contacts[i].bi==player.body)){
-                    //player.launching==false
-                    try{
-                        world.contacts[i].bi.parentRef.friendlyDown()
-                    }catch(err){}
-                    try{
-                        world.contacts[i].bj.parentRef.friendlyDown()
-                    }catch(err){}
-                    break
-                }
-                */
             }
         }
     }
@@ -317,11 +287,6 @@ window.onload = function(){
             player.canMove = true
             player.launching = false
         },600*(0.7/player.scaleFactor))
-        /*
-        setTimeout(function(){
-            player.launching = false
-        },222*(0.7/player.scaleFactor))
-        */
     }
     scene.add(player)
     
@@ -558,40 +523,6 @@ window.onload = function(){
     
     
     
-    /*    TEMPLATE
-    octEnemies = []
-    octEnemyGeo = new THREE.OctahedronBufferGeometry(2)
-    octEnemyMat = new THREE.MeshLambertMaterial({color:0xdb2b39})
-    octEnemyShape = new CANNON.Sphere(2)
-    octEnemy = function(){
-        this.mesh = new THREE.Mesh(
-            octEnemyGeo,
-            octEnemyMat
-        )
-        this.body = new CANNON.Body({
-            mass:2,
-            shape:octEnemyShape,
-            material:groundMaterial,
-            collisionFilterGroup:1,
-            collisionFilterMask:1|2|4
-        })
-        this.mesh.body = this.body
-        this.body.mesh = this.mesh
-        this.mesh.parentRef = this
-        this.body.parentRef = this
-        scene.add(this.mesh)
-        world.add(this.body)
-        octEnemies.push(this)
-        this.mesh.update = function(){
-            this.quaternion.fromArray(this.body.quaternion.toArray())
-            this.position.copy(this.body.position)
-        }
-        this.attack = function(){}
-        this.kill = function(){}
-        this.hit = function(){}
-    }
-    */
-    
     
     ground = new CANNON.Body({
         mass:0,
@@ -666,10 +597,12 @@ window.onload = function(){
                 tempSpeed=0
             }
             else if(player.body.position.y>=5 > 0){
-                tempSpeed = 0.4
+                //tempSpeed = 0.4
+                tempSpeed = 0.5
             }
             else{
-                tempSpeed = 1.5
+                //tempSpeed = 1.5
+                tempSpeed = 2.5
             }
             this.body.position.x -= (this.body.position.x-(tempX+this.x))*delta*tempSpeed
             this.body.position.z -= (this.body.position.z-(tempZ+this.z))*delta*tempSpeed
