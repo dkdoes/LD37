@@ -270,7 +270,7 @@ window.onload = function(){
     }
     player.score = 0
     player.wave = 0
-    player.waveTimer = 0
+    player.waveTimer = 10
     player.saved = 0
     player.scoreTimer = 1
     player.gameOverText = ''
@@ -288,7 +288,7 @@ window.onload = function(){
             player.score += 5 * saved
         }
         player.saved = saved
-        document.getElementById('score').innerHTML=player.gameOverText+'Score: '+player.score+'<br>Kills: '+player.kills+player.tutorialText
+        document.getElementById('score').innerHTML=player.gameOverText+'Score: '+player.score+'<br>Kills: '+player.kills+'<br>Wave: '+player.wave+player.tutorialText
     }
     player.jump = function(){
         if(player.jumping==0){
@@ -354,6 +354,7 @@ window.onload = function(){
         scene.add(this.mesh)
         this.body = new CANNON.Body({
             mass:2,
+            position:new CANNON.Vec3(0,200,0),
             shape:new CANNON.Sphere(2),
             material:groundMaterial,
             collisionFilterGroup:1,
@@ -465,6 +466,7 @@ window.onload = function(){
         )
         this.body = new CANNON.Body({
             mass:2,
+            position:new CANNON.Vec3(0,200,0),
             shape:octEnemyShape,
             material:groundMaterial,
             collisionFilterGroup:1,
@@ -556,6 +558,7 @@ window.onload = function(){
         )
         this.body = new CANNON.Body({
             mass:2,
+            position:new CANNON.Vec3(0,200,0),
             shape:oct2EnemyShape,
             material:groundMaterial,
             collisionFilterGroup:1,
@@ -666,6 +669,7 @@ window.onload = function(){
         )
         this.body = new CANNON.Body({
             mass:2,
+            position:new CANNON.Vec3(0,200,0),
             shape:tetraShape,
             material:slideMaterial,
             collisionFilterGroup:1,
@@ -1135,40 +1139,41 @@ render = function(){
     }
     else if(player.wave > 1){
         if (player.waveTimer <= 0){
-            
             player.wave++
+            player.waveTimer = 15
             if(player.wave%3==1){
-                player.waveTimer = 45
-                for(var i=0;i<5;i++){
-                    new dude()
+                new oct2Enemy()
+            }
+            if(player.wave%3==2){
+                new octEnemy()
+                new tetraEnemy()
+            }
+            if(player.wave%3==0){
+                new oct2Enemy()
+                new tetraEnemy()
+                new dude()
+            }
+            if(player.wave>6){
+                var temp = Math.round(player.wave/3)
+                if(temp>4){temp=4}
+                for(var i = 0; i<temp;i++){
+                    if(Math.random()<0.1){
+                        if(dudes.length<6){
+                        new dude()}
+                    }
+                    if(Math.random()<0.3){
+                        new oct2Enemy()
+                    }
+                    if(Math.random()<0.3){
+                        new octEnemy()
+                    }
+                    if(Math.random()<0.3){
+                        new tetraEnemy()
+                    }
                 }
             }
-            else if(player.wave%3==0){
-                player.waveTimer = 60
-                new oct2Enemy()
-                new oct2Enemy()
-                new oct2Enemy()
-                new octEnemy()
-                new octEnemy()
-            }
-            else{
-                player.waveTimer = 60
-                new oct2Enemy()
-                new octEnemy()
-                new octEnemy()
-                new tetraEnemy()
-                new tetraEnemy()
-            }
         }
-        else{
-            player.waveTimer -= delta
-            if(player.wave%3==0){
-                
-            }
-            else if(player.wave%3==2){
-                
-            }
-        }
+        else(player.waveTimer-=delta)
     }
     
     if(dudes.length<=0){
