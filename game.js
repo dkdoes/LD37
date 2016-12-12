@@ -1155,19 +1155,19 @@ render = function(){
             }
             if(player.wave>6){
                 var temp = Math.round(player.wave/3)
-                if(temp>4){temp=4}
+                if(temp>8){temp=8}
                 for(var i = 0; i<temp;i++){
                     if(Math.random()<0.1){
-                        if(dudes.length<6){
+                        if(dudes.length<10){
                         new dude()}
                     }
-                    if(Math.random()<0.3){
+                    if(Math.random()<0.5){
                         new oct2Enemy()
                     }
-                    if(Math.random()<0.3){
+                    if(Math.random()<0.5){
                         new octEnemy()
                     }
-                    if(Math.random()<0.3){
+                    if(Math.random()<0.5){
                         new tetraEnemy()
                     }
                 }
