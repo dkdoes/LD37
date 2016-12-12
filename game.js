@@ -302,13 +302,12 @@ window.onload = function(){
     player.launch = function(){
         player.launching = true
         player.canMove = false
+        //player.body.material = slideMaterial
         player.body.material = slide2Material
         var temp = player.shoot.clone()
         temp.setLength(player.launchSpeed*(1/player.scaleFactor))
         player.body.velocity.set(temp.x*-1,0,temp.z*-1)
-        setTimeout(function(){
-            player.body.material = slideMaterial
-        },350)
+        setTimeout(function(){player.body.material = slideMaterial},250)
         setTimeout(function(){
             player.body.material = groundMaterial
             //player.canMove = true
@@ -502,7 +501,7 @@ window.onload = function(){
             this.position.copy(this.body.position)
         }
         this.attack = function(){}
-        this.damage = 5
+        this.damage = 7
         this.killed = false
         this.kill = function(playerHit){
             if (this.killed == false){
@@ -709,7 +708,7 @@ window.onload = function(){
             temp.normalize()
             this.body.applyImpulse(temp.mult(300),this.body.position)
         }
-        this.damage = 5
+        this.damage = 7
         this.killed = false
         this.kill = function(playerHit){
             if (this.killed == false){
@@ -866,7 +865,7 @@ window.onload = function(){
             if(this.mesh.down==false){
                 this.mesh.hit = true
                 this.mesh.down = true
-                this.mesh.timer = 12
+                this.mesh.timer = 30
                 walldownSound.play()
                 new TWEEN.Tween(this.body.position)
                     .to({y:-4},200)
