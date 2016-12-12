@@ -270,6 +270,7 @@ window.onload = function(){
     }
     player.score = 0
     player.wave = 0
+    player.waveTimer = 0
     player.saved = 0
     player.scoreTimer = 1
     player.gameOverText = ''
@@ -988,12 +989,8 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                for(var i = 0; i<30;i++){
-                    new octEnemy()
-                    new tetraEnemy()
-                    new dude()
-                    i%4==0&&new oct2Enemy()
-                }
+                player.wave = 2
+                player.tutorialText = ''
                 //new dude()
                 //location.reload()
                 break
@@ -1134,6 +1131,43 @@ render = function(){
             player.wave = 2
             player.tutorialText = ''
             song.play()
+        }
+    }
+    else if(player.wave > 1){
+        if (player.waveTimer <= 0){
+            
+            player.wave++
+            if(player.wave%3==1){
+                player.waveTimer = 45
+                for(var i=0;i<5;i++){
+                    new dude()
+                }
+            }
+            else if(player.wave%3==0){
+                player.waveTimer = 60
+                new oct2Enemy()
+                new oct2Enemy()
+                new oct2Enemy()
+                new octEnemy()
+                new octEnemy()
+            }
+            else{
+                player.waveTimer = 60
+                new oct2Enemy()
+                new octEnemy()
+                new octEnemy()
+                new tetraEnemy()
+                new tetraEnemy()
+            }
+        }
+        else{
+            player.waveTimer -= delta
+            if(player.wave%3==0){
+                
+            }
+            else if(player.wave%3==2){
+                
+            }
         }
     }
     
