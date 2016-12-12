@@ -71,11 +71,11 @@ window.onload = function(){
     
     launchSound = new Howl({
         src:['launch.mp3'],
-        volume:0.3
+        volume:0.1
     })
     powerupSound = new Howl({
         src:['powerup.mp3'],
-        volume:0.1,
+        volume:0.05,
         rate:1.5
     })
     jumpSound = new Howl({
@@ -112,9 +112,12 @@ window.onload = function(){
     
     
     slideMaterial = new CANNON.Material("slideMaterial")
+    slide2Material = new CANNON.Material("slide2Material")
     groundMaterial = new CANNON.Material("groundMaterial")
     slide_ground_cm = new CANNON.ContactMaterial(slideMaterial,groundMaterial,{friction:0.01})
+    slide2_ground_cm = new CANNON.ContactMaterial(slide2Material,groundMaterial,{friction:0})
     world.addContactMaterial(slide_ground_cm)
+    world.addContactMaterial(slide2_ground_cm)
     
     
     
@@ -299,10 +302,13 @@ window.onload = function(){
     player.launch = function(){
         player.launching = true
         player.canMove = false
-        player.body.material = slideMaterial
+        player.body.material = slide2Material
         var temp = player.shoot.clone()
         temp.setLength(player.launchSpeed*(1/player.scaleFactor))
         player.body.velocity.set(temp.x*-1,0,temp.z*-1)
+        setTimeout(function(){
+            player.body.material = slideMaterial
+        },350)
         setTimeout(function(){
             player.body.material = groundMaterial
             //player.canMove = true
@@ -376,14 +382,20 @@ window.onload = function(){
                 this.moveTimer -= delta
             }
             else{
-                this.moveTimer = 0.5 + Math.random()
-                //var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
-                //temp = temp.vsub(this.body.position)
-                //temp.normalize()
-                var temp = new CANNON.Vec3(room.room.x,0,room.room.z)
-                temp = temp.vsub(this.body.position)
-                temp.normalize()
-                this.body.applyImpulse(temp.mult(25+Math.random()*50),this.body.position)
+                if(this.parentRef.safe){
+                    this.moveTimer = 0.12 + Math.random()*0.12
+                    var temp = new CANNON.Vec3(room.room.x,0,room.room.z)
+                    temp = temp.vsub(this.body.position)
+                    temp.normalize()
+                    this.body.velocity = temp.mult(50+Math.random()*50)
+                }
+                else{
+                    this.moveTimer = 0.5 + Math.random()
+                    var temp = new CANNON.Vec3(Math.random()*160-90,2,Math.random()*160-90)
+                    temp = temp.vsub(this.body.position)
+                    temp.normalize()
+                    this.body.applyImpulse(temp.mult(25+Math.random()*50),this.body.position)
+                }
             }
             if(this.parentRef.safe&&this.spawnTimer<0){
                 this.body.position.y = Math.min(this.body.position.y,4)
@@ -444,7 +456,7 @@ window.onload = function(){
     
     //octEnemies = []
     octEnemyGeo = new THREE.OctahedronGeometry(2)
-    octEnemyMat = new THREE.MeshLambertMaterial({color:0xf68e5f})
+    octEnemyMat = new THREE.MeshLambertMaterial({color:0xf6685f})
     octEnemyShape = new CANNON.Sphere(2)
     octEnemy = function(){
         this.mesh = new THREE.Mesh(
@@ -595,7 +607,7 @@ window.onload = function(){
                 if(playerHit){
                     //var temp = this.body.position.vsub(player.body.position)
                     //temp.normalize()
-                    player.score += 100
+                    player.score += 200
                     player.kills++
                     var temp = player.body.velocity.clone()
                     temp.normalize()
@@ -854,7 +866,7 @@ window.onload = function(){
             if(this.mesh.down==false){
                 this.mesh.hit = true
                 this.mesh.down = true
-                this.mesh.timer = 30
+                this.mesh.timer = 12
                 walldownSound.play()
                 new TWEEN.Tween(this.body.position)
                     .to({y:-4},200)
@@ -977,7 +989,12 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                new oct2Enemy()
+                for(var i = 0; i<30;i++){
+                    new octEnemy()
+                    new tetraEnemy()
+                    new dude()
+                    i%4==0&&new oct2Enemy()
+                }
                 //new dude()
                 //location.reload()
                 break
