@@ -285,7 +285,7 @@ window.onload = function(){
         }
         else{
             player.scoreTimer += 1
-            player.score += 5 * saved
+            player.wave>1&&(player.score += 5 * saved)
         }
         player.saved = saved
         document.getElementById('score').innerHTML=player.gameOverText+'Score: '+player.score+'<br>Kills: '+player.kills+'<br>Wave: '+player.wave+player.tutorialText
@@ -993,8 +993,8 @@ window.onload = function(){
                 player.jump()
                 break
             case 80:
-                player.wave = 2
-                player.tutorialText = ''
+                //player.wave = 2
+                //player.tutorialText = ''
                 //new dude()
                 //location.reload()
                 break
